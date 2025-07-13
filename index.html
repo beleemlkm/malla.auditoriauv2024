@@ -24,12 +24,12 @@
   <div class="semestre">
     <h2>2do Semestre</h2>
     <div class="ramos">
-      <div class="ramo" title="Abre Normativa contable IFRS" onclick="toggleAprobado(this)">Contabilidad financiera</div>
-      <div class="ramo" title="Abre Normativa tributaria" onclick="toggleAprobado(this)">Normativa empresarial II</div>
-      <div class="ramo" title="Abre Gestión de capital humano y Gestión comercial" onclick="toggleAprobado(this)">Gestión de organizaciones II</div>
+      <div class="ramo" title="Abre Normativa contable IFRS" onclick="toggleAprobado(this)" data-prerrequisitos="Introducción a la contabilidad">Contabilidad financiera</div>
+      <div class="ramo" title="Abre Normativa tributaria" onclick="toggleAprobado(this)" data-prerrequisitos="Normativa empresarial I">Normativa empresarial II</div>
+      <div class="ramo" title="Abre Gestión de capital humano y Gestión comercial" onclick="toggleAprobado(this)" data-prerrequisitos="Gestión de organizaciones I">Gestión de organizaciones II</div>
       <div class="ramo" title="Abre Control interno y gestión de riesgos" onclick="toggleAprobado(this)">Introducción a la auditoría</div>
-      <div class="ramo" title="Abre Economía II y Costos para la toma de decisiones I" onclick="toggleAprobado(this)">Economía I</div>
-      <div class="ramo" title="Abre Estadística" onclick="toggleAprobado(this)">Matemáticas II</div>
+      <div class="ramo" title="Abre Economía II y Costos para la toma de decisiones I" onclick="toggleAprobado(this)" data-prerrequisitos="Matemáticas I">Economía I</div>
+      <div class="ramo" title="Abre Estadística" onclick="toggleAprobado(this)" data-prerrequisitos="Matemáticas I">Matemáticas II</div>
     </div>
   </div>
 
@@ -37,11 +37,11 @@
   <div class="semestre">
     <h2>3er Semestre</h2>
     <div class="ramos">
-      <div class="ramo" title="Abre NIC SP, Taller I, Contabilidad avanzada I y Proyecto de investigación" onclick="toggleAprobado(this)">Normativa contable IFRS</div>
-      <div class="ramo" title="Abre Impuestos I y Taller I" onclick="toggleAprobado(this)">Normativa tributaria</div>
+      <div class="ramo" title="Abre NIC SP, Taller I, Contabilidad avanzada I y Proyecto de investigación" onclick="toggleAprobado(this)" data-prerrequisitos="Contabilidad financiera">Normativa contable IFRS</div>
+      <div class="ramo" title="Abre Impuestos I y Taller I" onclick="toggleAprobado(this)" data-prerrequisitos="Normativa empresarial II">Normativa tributaria</div>
       <div class="ramo" title="Abre Taller I" onclick="toggleAprobado(this)">TIC para los negocios</div>
-      <div class="ramo" title="Abre Taller I" onclick="toggleAprobado(this)">Economía II</div>
-      <div class="ramo" title="Abre Estadística para los negocios y Taller I" onclick="toggleAprobado(this)">Estadística</div>
+      <div class="ramo" title="Abre Taller I" onclick="toggleAprobado(this)" data-prerrequisitos="Economía I">Economía II</div>
+      <div class="ramo" title="Abre Estadística para los negocios y Taller I" onclick="toggleAprobado(this)" data-prerrequisitos="Matemáticas II">Estadística</div>
       <div class="ramo" title="Abre Fundamentos de auditoría, Ejecución auditoría, Auditoría de sistemas, Proyecto investigación y Práctica temprana" onclick="toggleAprobado(this)">Control interno y gestión de riesgos</div>
     </div>
   </div>
@@ -50,12 +50,12 @@
   <div class="semestre">
     <h2>4to Semestre</h2>
     <div class="ramos">
-      <div class="ramo" title="Abre Taller I" onclick="toggleAprobado(this)">Fundamentos de auditoría</div>
-      <div class="ramo" title="Abre Práctica temprana" onclick="toggleAprobado(this)">Normativa contable NIC SP</div>
-      <div class="ramo" title="Abre Tributación aplicada I y Práctica temprana" onclick="toggleAprobado(this)">Impuestos I</div>
+      <div class="ramo" title="Abre Taller I" onclick="toggleAprobado(this)" data-prerrequisitos="Control interno y gestión de riesgos">Fundamentos de auditoría</div>
+      <div class="ramo" title="Abre Práctica temprana" onclick="toggleAprobado(this)" data-prerrequisitos="Normativa contable IFRS">Normativa contable NIC SP</div>
+      <div class="ramo" title="Abre Tributación aplicada I y Práctica temprana" onclick="toggleAprobado(this)" data-prerrequisitos="Normativa tributaria">Impuestos I</div>
       <div class="ramo" title="Abre Práctica temprana" onclick="toggleAprobado(this)">Costos para la toma de decisiones I</div>
-      <div class="ramo" title="Abre Ciencias de datos y Costos II" onclick="toggleAprobado(this)">Estadística para los negocios</div>
-      <div class="ramo" title="Abre Inglés II" onclick="toggleAprobado(this)">Inglés I</div>
+      <div class="ramo" title="Abre Ciencias de datos y Costos II" onclick="toggleAprobado(this)" data-prerrequisitos="Estadística">Estadística para los negocios</div>
+      <div class="ramo" title="Abre Inglés II" onclick="toggleAprobado(this)" data-prerrequisitos="Inglés I">Inglés I</div>
     </div>
   </div>
 
@@ -63,12 +63,12 @@
   <div class="semestre">
     <h2>5to Semestre</h2>
     <div class="ramos">
-      <div class="ramo" title="Abre Ejecución de proyectos de auditoría" onclick="toggleAprobado(this)">Bases y aplicación de ciencias de datos</div>
-      <div class="ramo" title="Abre Impuestos II" onclick="toggleAprobado(this)">Tributación aplicada I</div>
+      <div class="ramo" title="Abre Ejecución de proyectos de auditoría" onclick="toggleAprobado(this)" data-prerrequisitos="Estadística para los negocios">Bases y aplicación de ciencias de datos</div>
+      <div class="ramo" title="Abre Impuestos II" onclick="toggleAprobado(this)" data-prerrequisitos="Impuestos I">Tributación aplicada I</div>
       <div class="ramo" onclick="toggleAprobado(this)">Gestión de capital humano</div>
-      <div class="ramo" title="Abre Introducción a las finanzas y Gestión de operaciones" onclick="toggleAprobado(this)">Costos para la toma de decisiones II</div>
-      <div class="ramo" title="Abre Inglés III" onclick="toggleAprobado(this)">Inglés II</div>
-      <div class="ramo" title="Abre Taller II" onclick="toggleAprobado(this)">Taller de integración perfil UV I</div>
+      <div class="ramo" title="Abre Introducción a las finanzas y Gestión de operaciones" onclick="toggleAprobado(this)" data-prerrequisitos="Costos para la toma de decisiones I">Costos para la toma de decisiones II</div>
+      <div class="ramo" title="Abre Inglés III" onclick="toggleAprobado(this)" data-prerrequisitos="Inglés II">Inglés II</div>
+      <div class="ramo" title="Abre Taller II" onclick="toggleAprobado(this)" data-prerrequisitos="Taller de integración perfil UV I">Taller de integración perfil UV I</div>
     </div>
   </div>
 
@@ -76,12 +76,12 @@
   <div class="semestre">
     <h2>6to Semestre</h2>
     <div class="ramos">
-      <div class="ramo" title="Abre Contabilidad avanzada II" onclick="toggleAprobado(this)">Contabilidad avanzada I</div>
-      <div class="ramo" title="Abre Tributación aplicada II y Proyecto de investigación" onclick="toggleAprobado(this)">Impuestos II</div>
-      <div class="ramo" title="Abre Gestión de operaciones" onclick="toggleAprobado(this)">Gestión comercial</div>
-      <div class="ramo" title="Abre Finanzas corporativas, Proyecto de investigación y Gestión financiera" onclick="toggleAprobado(this)">Introducción a las finanzas</div>
-      <div class="ramo" title="Abre Inglés IV" onclick="toggleAprobado(this)">Inglés III</div>
-      <div class="ramo" onclick="toggleAprobado(this)">Taller de integración perfil UV II</div>
+      <div class="ramo" title="Abre Contabilidad avanzada II" onclick="toggleAprobado(this)" data-prerrequisitos="Bases y aplicación de ciencias de datos">Contabilidad avanzada I</div>
+      <div class="ramo" title="Abre Tributación aplicada II y Proyecto de investigación" onclick="toggleAprobado(this)" data-prerrequisitos="Tributación aplicada I">Impuestos II</div>
+      <div class="ramo" title="Abre Gestión de operaciones" onclick="toggleAprobado(this)" data-prerrequisitos="Gestión de capital humano">Gestión comercial</div>
+      <div class="ramo" title="Abre Finanzas corporativas, Proyecto de investigación y Gestión financiera" onclick="toggleAprobado(this)" data-prerrequisitos="Costos para la toma de decisiones II">Introducción a las finanzas</div>
+      <div class="ramo" title="Abre Inglés IV" onclick="toggleAprobado(this)" data-prerrequisitos="Inglés III">Inglés III</div>
+      <div class="ramo" onclick="toggleAprobado(this)" data-prerrequisitos="Taller de integración perfil UV I">Taller de integración perfil UV II</div>
       <div class="ramo" onclick="toggleAprobado(this)">Ejecución de proyectos de auditoría</div>
     </div>
   </div>
@@ -90,13 +90,13 @@
   <div class="semestre">
     <h2>7mo Semestre</h2>
     <div class="ramos">
-      <div class="ramo" title="Abre Contabilidad avanzada III, Auditoría de estados financieros, Electivos y Práctica profesional" onclick="toggleAprobado(this)">Contabilidad avanzada II</div>
-      <div class="ramo" title="Abre Gestión tributaria, Electivos y Práctica profesional" onclick="toggleAprobado(this)">Tributación aplicada II</div>
-      <div class="ramo" title="Abre Planificación y control de gestión y Electivos" onclick="toggleAprobado(this)">Gestión de operaciones</div>
+      <div class="ramo" title="Abre Contabilidad avanzada III, Auditoría de estados financieros, Electivos y Práctica profesional" onclick="toggleAprobado(this)" data-prerrequisitos="Contabilidad avanzada I">Contabilidad avanzada II</div>
+      <div class="ramo" title="Abre Gestión tributaria, Electivos y Práctica profesional" onclick="toggleAprobado(this)" data-prerrequisitos="Impuestos II">Tributación aplicada II</div>
+      <div class="ramo" title="Abre Planificación y control de gestión y Electivos" onclick="toggleAprobado(this)" data-prerrequisitos="Gestión comercial">Gestión de operaciones</div>
       <div class="ramo" title="Abre Electivos y Dirección gerencial" onclick="toggleAprobado(this)">Auditoría de sistemas</div>
-      <div class="ramo" title="Abre Electivos, Formulación de proyectos y Dirección gerencial" onclick="toggleAprobado(this)">Finanzas corporativas</div>
-      <div class="ramo" title="Abre Electivos y Dirección gerencial" onclick="toggleAprobado(this)">Inglés IV</div>
-      <div class="ramo" title="Abre Investigación aplicada, Electivos y Dirección gerencial" onclick="toggleAprobado(this)">Proyecto de investigación</div>
+      <div class="ramo" title="Abre Electivos, Formulación de proyectos y Dirección gerencial" onclick="toggleAprobado(this)" data-prerrequisitos="Introducción a las finanzas">Finanzas corporativas</div>
+      <div class="ramo" title="Abre Electivos y Dirección gerencial" onclick="toggleAprobado(this)" data-prerrequisitos="Inglés III">Inglés IV</div>
+      <div class="ramo" title="Abre Investigación aplicada, Electivos y Dirección gerencial" onclick="toggleAprobado(this)" data-prerrequisitos="Proyecto de investigación">Proyecto de investigación</div>
       <div class="ramo" title="Abre Electivos, Dirección gerencial y Práctica profesional" onclick="toggleAprobado(this)">Práctica temprana</div>
     </div>
   </div>
@@ -105,12 +105,12 @@
   <div class="semestre">
     <h2>8vo Semestre</h2>
     <div class="ramos">
-      <div class="ramo" title="Abre Taller de integración profesional" onclick="toggleAprobado(this)">Contabilidad avanzada III</div>
-      <div class="ramo" title="Abre Taller de integración profesional" onclick="toggleAprobado(this)">Gestión tributaria</div>
-      <div class="ramo" title="Abre Taller de integración profesional" onclick="toggleAprobado(this)">Planificación y control de gestión</div>
-      <div class="ramo" title="Abre Taller y Práctica profesional" onclick="toggleAprobado(this)">Auditoría de estados financieros</div>
-      <div class="ramo" title="Abre Taller de integración profesional" onclick="toggleAprobado(this)">Gestión financiera</div>
-      <div class="ramo" title="Abre Taller de integración profesional" onclick="toggleAprobado(this)">Investigación aplicada</div>
+      <div class="ramo" title="Abre Taller de integración profesional" onclick="toggleAprobado(this)" data-prerrequisitos="Contabilidad avanzada II">Contabilidad avanzada III</div>
+      <div class="ramo" title="Abre Taller de integración profesional" onclick="toggleAprobado(this)" data-prerrequisitos="Tributación aplicada II">Gestión tributaria</div>
+      <div class="ramo" title="Abre Taller de integración profesional" onclick="toggleAprobado(this)" data-prerrequisitos="Gestión de operaciones">Planificación y control de gestión</div>
+      <div class="ramo" title="Abre Taller y Práctica profesional" onclick="toggleAprobado(this)" data-prerrequisitos="Auditoría de sistemas">Auditoría de estados financieros</div>
+      <div class="ramo" title="Abre Taller de integración profesional" onclick="toggleAprobado(this)" data-prerrequisitos="Introducción a las finanzas">Gestión financiera</div>
+      <div class="ramo" title="Abre Taller de integración profesional" onclick="toggleAprobado(this)" data-prerrequisitos="Proyecto de investigación">Investigación aplicada</div>
     </div>
   </div>
 
