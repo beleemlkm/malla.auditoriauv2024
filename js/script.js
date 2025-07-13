@@ -1,8 +1,4 @@
-function toggleAprobado(elem) {
-  elem.classList.toggle('aprobado');
-}
-
-// Permite ingresar nota con clic derecho (context menu)
+// Función para marcar un ramo según la nota ingresada con clic derecho
 document.addEventListener("contextmenu", function (e) {
   if (e.target.classList.contains("ramo")) {
     e.preventDefault();
@@ -10,7 +6,7 @@ document.addEventListener("contextmenu", function (e) {
     const ramo = e.target;
     const nota = prompt("Ingresa tu nota final para este ramo (ej: 4.5)");
 
-    if (nota === null || nota.trim() === "") return; // Cancelado o vacío
+    if (nota === null || nota.trim() === "") return;
 
     const notaNum = parseFloat(nota);
 
@@ -39,5 +35,51 @@ document.addEventListener("contextmenu", function (e) {
     }
 
     ramo.appendChild(estado);
+    guardarEstado(); // Guardar al ingresar nota
   }
 });
+
+// Función para marcar/desmarcar aprobado con clic normal
+function toggleAprobado(elem) {
+  elem.classList.toggle('aprobado');
+  guardarEstado(); // Guardar al marcar/desmarcar
+}
+
+// Guardar estado en localStorage
+function guardarEstado() {
+  const estados = [];
+  document.querySelectorAll(".ramo").forEach((ramo) => {
+    estados.push({
+      clases: Array.from(ramo.classList),
+      estadoTexto: ramo.querySelector(".estado")?.textContent || ""
+    });
+  });
+  localStorage.setItem("estadoMalla", JSON.stringify(estados));
+}
+
+// Cargar estado al iniciar
+function cargarEstado() {
+  const estadoGuardado = localStorage.getItem("estadoMalla");
+  if (!estadoGuardado) return;
+
+  const estados = JSON.parse(estadoGuardado);
+  document.querySelectorAll(".ramo").forEach((ramo, i) => {
+    if (!estados[i]) return;
+
+    // Restaurar clases
+    ramo.className = "ramo"; // reset
+    estados[i].clases.forEach(clase => {
+      if (clase !== "ramo") ramo.classList.add(clase);
+    });
+
+    // Restaurar etiqueta estado
+    if (estados[i].estadoTexto) {
+      const estado = document.createElement("div");
+      estado.classList.add("estado");
+      estado.textContent = estados[i].estadoTexto;
+      ramo.appendChild(estado);
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", cargarEstado);
