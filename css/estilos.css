@@ -96,7 +96,7 @@ h1 {
   color: #777;
 }
 .ramo.eximido {
-  background-color: #e0d4f7;
+  background-color: var(--verde);
   border-color: #b39ddb;
   color: #777;
 }
