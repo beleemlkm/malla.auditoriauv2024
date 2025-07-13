@@ -115,3 +115,12 @@ h1 {
   border-radius: 6px;
   display: inline-block;
 }
+.ramo.bloqueado {
+  background-color: #cccccc !important;
+  border-color: #999999 !important;
+  color: #666666 !important;
+  cursor: not-allowed;
+  text-decoration: none !important;
+  pointer-events: none; /* Impide interacción */
+  opacity: 0.6;
+}
