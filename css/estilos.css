@@ -90,21 +90,19 @@ h1 {
   opacity: 1;
 }
 
-.ramo.aprobado {
-  background-color: var(--verde);
-  border-color: #6fcf97;
-  color: #777;
-}
+.ramo.aprobado,
 .ramo.eximido {
   background-color: var(--verde);
-  border-color: #b39ddb;
-  color: #777;
+  border-color: #6fcf97;
+  color: #555;
+  text-decoration: line-through;
 }
 
 .ramo.reprobado {
-  background-color: #f9d6d5;
+  background-color: #f8d4d4;
   border-color: #f44336;
   color: #a00;
+  text-decoration: line-through;
 }
 
 .estado {
@@ -116,24 +114,4 @@ h1 {
   padding: 0.3rem 0.5rem;
   border-radius: 6px;
   display: inline-block;
-}
-.estado {
-  font-size: 0.9em;
-  margin-top: 5px;
-  color: #555;
-}
-
-.eximido {
-  background-color: #d4f8d4;
-  text-decoration: line-through;
-}
-
-.aprobado {
-  background-color: #fef3c7;
-  text-decoration: line-through;
-}
-
-.reprobado {
-  background-color: #f8d4d4;
-  text-decoration: line-through;
 }
