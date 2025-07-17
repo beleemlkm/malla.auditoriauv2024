@@ -1,142 +1,102 @@
-// Función para marcar un ramo según la nota ingresada con clic derecho
-document.addEventListener("contextmenu", function (e) {
-  if (e.target.classList.contains("ramo")) {
-    e.preventDefault();
+document.addEventListener("DOMContentLoaded", function () {
+  const asignaturas = document.querySelectorAll(".asignatura");
 
-    const ramo = e.target;
-    const nota = prompt("Ingresa tu nota final para este ramo (ej: 4.5)");
+  asignaturas.forEach((asignatura) => {
+    const checkbox = asignatura.querySelector("input[type='checkbox']");
+    const nombre = asignatura.querySelector("span").textContent;
+    const id = asignatura.getAttribute("id");
 
-    if (nota === null || nota.trim() === "") return;
+    // Evitar duplicar campo nota
+    if (!asignatura.querySelector("input[type='number']")) {
+      const notaInput = document.createElement("input");
+      notaInput.type = "number";
+      notaInput.min = "1.0";
+      notaInput.max = "7.0";
+      notaInput.step = "0.1";
+      notaInput.placeholder = "Ingresa nota";
+      notaInput.classList.add("nota-input");
+      asignatura.appendChild(notaInput);
 
-    const notaNum = parseFloat(nota);
+      // Mostrar aprobado/reprobado y guardar estado
+      notaInput.addEventListener("input", function () {
+        const nota = parseFloat(notaInput.value);
+        if (!isNaN(nota)) {
+          if (nota >= 5.0) {
+            checkbox.checked = true;
+            asignatura.classList.add("aprobado");
+          } else if (nota >= 4.0) {
+            checkbox.checked = true;
+            asignatura.classList.remove("aprobado");
+          } else {
+            checkbox.checked = false;
+            asignatura.classList.remove("aprobado");
+          }
+          saveState();
+          updateDependencias(); // Actualizar restricciones
+        }
+      });
 
-    if (isNaN(notaNum) || notaNum < 1 || notaNum > 7) {
-      alert("Por favor ingresa una nota válida entre 1.0 y 7.0");
-      return;
+      // Restaurar nota si existe
+      const savedNota = localStorage.getItem(`nota-${id}`);
+      if (savedNota) {
+        notaInput.value = savedNota;
+        notaInput.dispatchEvent(new Event("input"));
+      }
     }
 
-    // Limpiar clases y etiquetas previas
-    ramo.classList.remove("aprobado", "eximido", "reprobado");
-    ramo.querySelector(".estado")?.remove();
-
-    // Crear etiqueta visual
-    const estado = document.createElement("div");
-    estado.classList.add("estado");
-
-    if (notaNum >= 5.0) {
-      ramo.classList.add("eximido");
-      estado.textContent = `Eximido (${notaNum})`;
-    } else if (notaNum >= 4.0) {
-      ramo.classList.add("aprobado");
-      estado.textContent = `Aprobado (${notaNum})`;
-    } else {
-      ramo.classList.add("reprobado");
-      estado.textContent = `Reprobado (${notaNum})`;
+    // Restaurar check
+    const saved = localStorage.getItem(id);
+    if (saved === "true") {
+      checkbox.checked = true;
     }
 
-    ramo.appendChild(estado);
-    guardarEstado(); // Guardar al ingresar nota
-  }
-});
-
-// Función para marcar/desmarcar aprobado con clic normal
-function toggleAprobado(elem) {
-  elem.classList.toggle('aprobado');
-  guardarEstado(); // Guardar al marcar/desmarcar
-}
-
-// Guardar estado en localStorage
-function guardarEstado() {
-  const estados = [];
-  document.querySelectorAll(".ramo").forEach((ramo) => {
-    estados.push({
-      clases: Array.from(ramo.classList),
-      estadoTexto: ramo.querySelector(".estado")?.textContent || ""
+    // Guardar cambios
+    checkbox.addEventListener("change", function () {
+      localStorage.setItem(id, checkbox.checked);
+      saveState();
+      updateDependencias();
     });
   });
-  localStorage.setItem("estadoMalla", JSON.stringify(estados));
-}
 
-// Cargar estado al iniciar
-function cargarEstado() {
-  const estadoGuardado = localStorage.getItem("estadoMalla");
-  if (!estadoGuardado) return;
-
-  const estados = JSON.parse(estadoGuardado);
-  document.querySelectorAll(".ramo").forEach((ramo, i) => {
-    if (!estados[i]) return;
-
-    // Restaurar clases
-    ramo.className = "ramo"; // reset
-    estados[i].clases.forEach(clase => {
-      if (clase !== "ramo") ramo.classList.add(clase);
+  function saveState() {
+    asignaturas.forEach((asignatura) => {
+      const checkbox = asignatura.querySelector("input[type='checkbox']");
+      const notaInput = asignatura.querySelector("input[type='number']");
+      const id = asignatura.getAttribute("id");
+      localStorage.setItem(id, checkbox.checked);
+      if (notaInput) {
+        localStorage.setItem(`nota-${id}`, notaInput.value);
+      }
     });
+  }
 
-    // Restaurar etiqueta estado
-    if (estados[i].estadoTexto) {
-      const estado = document.createElement("div");
-      estado.classList.add("estado");
-      estado.textContent = estados[i].estadoTexto;
-      ramo.appendChild(estado);
-    }
-  });
-}
+  function updateDependencias() {
+    // Define aquí los requisitos entre ramos (ejemplo)
+    const dependencias = {
+      "contabilidad-ii": "contabilidad-i",
+      "auditoria": "contabilidad-ii",
+      "costos": "contabilidad-i",
+    };
 
-document.addEventListener("DOMContentLoaded", cargarEstado);
-// Función que revisa y bloquea ramos si sus prerrequisitos no están aprobados/eximidos
-function actualizarBloqueos() {
-  const ramos = document.querySelectorAll('.ramo');
+    Object.entries(dependencias).forEach(([rama, requisito]) => {
+      const ramoElem = document.getElementById(rama);
+      const requisitoElem = document.getElementById(requisito);
 
-  ramos.forEach(ramo => {
-    const prereqs = ramo.dataset.prerrequisitos;
-    if (!prereqs) {
-      ramo.classList.remove('bloqueado');
-      return; // Si no tiene prerrequisitos, siempre desbloqueado
-    }
+      if (ramoElem && requisitoElem) {
+        const nota = parseFloat(localStorage.getItem(`nota-${requisito}`));
+        const habilitado = !isNaN(nota) && nota >= 4.0;
 
-    // Prerrequisitos separados por coma y espacio si hay más de uno
-    const prereqArray = prereqs.split(',').map(p => p.trim());
+        const checkbox = ramoElem.querySelector("input[type='checkbox']");
+        checkbox.disabled = !habilitado;
 
-    // Verificar si TODOS los prerrequisitos están aprobados o eximidos
-    const todosAprobados = prereqArray.every(nombrePrerreq => {
-      // Buscar ramo que tenga ese nombre exacto
-      const ramoPrereq = Array.from(ramos).find(r => r.textContent.trim() === nombrePrerreq);
-      if (!ramoPrereq) return false; // Si no existe ese ramo, no desbloquear
-      return ramoPrereq.classList.contains('aprobado') || ramoPrereq.classList.contains('eximido');
+        // Desmarcar si se deshabilita
+        if (!habilitado) {
+          checkbox.checked = false;
+          localStorage.setItem(rama, false);
+        }
+      }
     });
-
-    if (todosAprobados) {
-      ramo.classList.remove('bloqueado');
-    } else {
-      ramo.classList.add('bloqueado');
-    }
-  });
-}
-
-// Modificar la función toggleAprobado para que no funcione si el ramo está bloqueado
-function toggleAprobado(elem) {
-  if (elem.classList.contains('bloqueado')) {
-    alert('Debes aprobar los prerrequisitos antes de marcar este ramo.');
-    return;
   }
-  elem.classList.toggle('aprobado');
-  guardarEstado();
-  actualizarBloqueos();
-}
 
-// Modificar el listener para poner nota con clic derecho también bloquea si está bloqueado
-document.addEventListener("contextmenu", function (e) {
-  if (e.target.classList.contains("ramo")) {
-    if (e.target.classList.contains("bloqueado")) {
-      alert("Debes aprobar los prerrequisitos antes de modificar este ramo.");
-      e.preventDefault();
-      return;
-    }
-  }
-});
-
-// Llamar actualizarBloqueos después de cargar el estado guardado
-document.addEventListener("DOMContentLoaded", () => {
-  cargarEstado();
-  actualizarBloqueos();
+  updateDependencias(); // Inicial
 });
