@@ -264,7 +264,7 @@
         semestre.classList.add("semestre");
 
         // Sticker lindo por semestre (cambia icono para variedad)
-        const stickers = ["🐱","🌸","📖","🐰","🌼","🐝","📚","🌻","🦄","🍀"];
+        const stickers = ["🐱","🎀","📖","🐰","🌷","🐝","🪄","🌻","🦦","🍀🎉"];
         const stickerSpan = document.createElement("span");
         stickerSpan.classList.add("sticker");
         stickerSpan.textContent = stickers[s - 1];
@@ -284,7 +284,7 @@
           if (estado) div.classList.add(estado);
 
           // Bloquear si no cumple requisitos o está reprobado o sin nota
-          const habilitado = cumpleRequisitos(ramo) && (nota === "" || estado !== "reprobado");
+          const habilitado = cumpleRequisitos(ramo) || estado === "reprobado";
 
           if (!habilitado) {
             div.classList.add("bloqueado");
