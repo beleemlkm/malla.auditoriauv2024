@@ -1,21 +1,104 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Malla Curricular - Auditoría</title>
-  <link rel="stylesheet" href="estilos.css" />
+  <link rel="stylesheet" href="css/estilos.css">
+  <style>
+    .ramo {
+      padding: 5px;
+      border: 1px solid #ccc;
+      margin: 4px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .ramo.aprobado {
+      background-color: #d4edda;
+    }
+    .nota-input {
+      margin-left: 10px;
+      width: 60px;
+    }
+  </style>
 </head>
 <body>
   <h1>Malla Curricular - Auditoría</h1>
-
   <div id="contenedor"></div>
 
-  <div id="avance-global" style="margin-top: 3rem; text-align: center;">
-    <h2>Avance General</h2>
-    <p id="progreso-texto">Cargando...</p>
-    <progress id="progreso-barra" value="0" max="100" style="width: 80%; height: 24px;"></progress>
-  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const ramos = document.querySelectorAll(".ramo");
 
-  <script src="script.js"></script>
+      ramos.forEach((ramo) => {
+        const nombre = ramo.textContent.trim();
+
+        if (!ramo.querySelector("input")) {
+          const input = document.createElement("input");
+          input.type = "number";
+          input.min = "1.0";
+          input.max = "7.0";
+          input.step = "0.1";
+          input.classList.add("nota-input");
+          input.placeholder = "Nota";
+
+          const savedNota = localStorage.getItem(`nota-${nombre}`);
+          if (savedNota) {
+            input.value = savedNota;
+          }
+
+          input.addEventListener("input", () => {
+            localStorage.setItem(`nota-${nombre}`, input.value);
+            actualizarEstado(ramo);
+            actualizarBloqueos();
+          });
+
+          ramo.appendChild(input);
+        }
+
+        const savedNota = localStorage.getItem(`nota-${nombre}`);
+        if (savedNota && parseFloat(savedNota) >= 4.0) {
+          ramo.classList.add("aprobado");
+        }
+      });
+
+      function actualizarEstado(ramo) {
+        const notaInput = ramo.querySelector("input");
+        const nota = parseFloat(notaInput.value);
+        if (!isNaN(nota) && nota >= 4.0) {
+          ramo.classList.add("aprobado");
+        } else {
+          ramo.classList.remove("aprobado");
+        }
+      }
+
+      function actualizarBloqueos() {
+        document.querySelectorAll(".ramo").forEach((ramo) => {
+          const requisitos = ramo.getAttribute("data-prerrequisitos");
+          const notaInput = ramo.querySelector("input");
+
+          if (requisitos) {
+            const nombres = requisitos.split(",").map(r => r.trim());
+            const cumple = nombres.every(nombre => {
+              const nota = parseFloat(localStorage.getItem(`nota-${nombre}`));
+              return !isNaN(nota) && nota >= 4.0;
+            });
+
+            if (!cumple) {
+              ramo.classList.add("bloqueado");
+              notaInput.disabled = true;
+              notaInput.value = "";
+            } else {
+              ramo.classList.remove("bloqueado");
+              notaInput.disabled = false;
+              const saved = localStorage.getItem(`nota-${ramo.textContent.trim()}`);
+              if (saved) notaInput.value = saved;
+            }
+          }
+        });
+      }
+
+      actualizarBloqueos();
+    });
+  </script>
 </body>
 </html>
