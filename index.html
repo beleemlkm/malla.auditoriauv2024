@@ -40,4 +40,176 @@
       display: flex; justify-content: space-between;
       align-items: center;
       transition: background 0.3s, opacity 0.3s;
-      opacity: 
+      opacity: 1;
+    }
+    .course:hover { background: #d1c4e9; }
+    .course.locked {
+      background: #ddd;
+      color: #aaa;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+    .course.taken { text-decoration: line-through; }
+    .course input {
+      width: 45px; border-radius: 6px;
+      border: 1px solid #ccc; padding: 2px;
+      text-align: center;
+    }
+    .course.approved { background: #d0f5c8; }
+    .course.exam { background: #fff5b7; }
+  </style>
+</head>
+<body>
+  <h1>📚 Malla Curricular Auditoría UV 🐱🌸</h1>
+  <div class="container" id="mallaContainer"></div>
+
+  <script>
+    const malla = {
+      '1er Semestre': [
+        { nombre: 'Introducción a la contabilidad', abre: ['Contabilidad financiera'] },
+        { nombre: 'Normativa empresarial I', abre: ['Normativa empresarial II'] },
+        { nombre: 'Gestión de organizaciones I', abre: ['Gestión comercial'] },
+        { nombre: 'Lengua materna y autorregulación' },
+        { nombre: 'Matemáticas I', abre: ['Matemáticas II', 'Economía I'] }
+      ],
+      '2do Semestre': [
+        { nombre: 'Contabilidad financiera', abre: ['Normativa contable IFRS'] },
+        { nombre: 'Normativa empresarial II', abre: ['Normativa tributaria'] },
+        { nombre: 'Gestión comercial', abre: ['Gestión de operaciones'] },
+        { nombre: 'Introducción a la auditoría', abre: ['Control interno y gestión de riesgos'] },
+        { nombre: 'Economía I', abre: ['Economía II', 'Costos para la toma de decisiones I'] },
+        { nombre: 'Matemáticas II', abre: ['Estadística'] }
+      ],
+      '3er Semestre': [
+        { nombre: 'Normativa contable IFRS', abre: ['Normativa contable NIC SP'] },
+        { nombre: 'Normativa tributaria', abre: ['Impuestos I'] },
+        { nombre: 'TIC para los negocios', abre: ['Taller de integración perfil UV I'] },
+        { nombre: 'Economía II', abre: ['Taller de integración perfil UV I'] },
+        { nombre: 'Estadística', abre: ['Estadística para los negocios'] },
+        { nombre: 'Control interno y gestión de riesgos', abre: ['Fundamentos de auditoría'] }
+      ],
+      '4to Semestre': [
+        { nombre: 'Fundamentos de auditoría', abre: ['Taller de integración perfil UV I'] },
+        { nombre: 'Normativa contable NIC SP', abre: ['Práctica temprana'] },
+        { nombre: 'Impuestos I', abre: ['Tributación aplicada I'] },
+        { nombre: 'Costos para la toma de decisiones I', abre: ['Práctica temprana'] },
+        { nombre: 'Estadística para los negocios', abre: ['Bases y aplicación de ciencias de datos'] },
+        { nombre: 'Inglés I', abre: ['Inglés II'] }
+      ],
+      '5to Semestre': [
+        { nombre: 'Bases y aplicación de ciencias de datos', abre: ['Ejecución de proyectos de auditoría'] },
+        { nombre: 'Tributación aplicada I', abre: ['Impuestos II'] },
+        { nombre: 'Gestión de capital humano' },
+        { nombre: 'Costos para la toma de decisiones II', abre: ['Introducción a las finanzas'] },
+        { nombre: 'Inglés II', abre: ['Inglés III'] },
+        { nombre: 'Taller de integración perfil UV I', abre: ['Taller de integración perfil UV II'] }
+      ],
+      '6to Semestre': [
+        { nombre: 'Contabilidad avanzada I', abre: ['Contabilidad avanzada II'] },
+        { nombre: 'Impuestos II', abre: ['Tributación aplicada II'] },
+        { nombre: 'Gestión de operaciones', abre: ['Planificación y control de gestión'] },
+        { nombre: 'Introducción a las finanzas', abre: ['Finanzas corporativas'] },
+        { nombre: 'Inglés III', abre: ['Inglés IV'] },
+        { nombre: 'Taller de integración perfil UV II' },
+        { nombre: 'Ejecución de proyectos de auditoría' }
+      ],
+      '7mo Semestre': [
+        { nombre: 'Contabilidad avanzada II', abre: ['Contabilidad avanzada III'] },
+        { nombre: 'Tributación aplicada II', abre: ['Gestión tributaria'] },
+        { nombre: 'Auditoría de sistemas', abre: ['Electivo 1 profesional'] },
+        { nombre: 'Finanzas corporativas', abre: ['Formulación de proyectos'] },
+        { nombre: 'Inglés IV', abre: [] },
+        { nombre: 'Proyecto de investigación', abre: [] },
+        { nombre: 'Práctica temprana', abre: [] }
+      ],
+      '8vo Semestre': [
+        { nombre: 'Contabilidad avanzada III', abre: ['Taller profesional'] },
+        { nombre: 'Gestión tributaria', abre: [] },
+        { nombre: 'Planificación y control de gestión', abre: [] },
+        { nombre: 'Auditoría de estados financieros', abre: [] },
+        { nombre: 'Gestión financiera', abre: [] },
+        { nombre: 'Investigación aplicada', abre: [] },
+      ],
+      '9no Semestre': [
+        { nombre: 'Electivo 1 profesional', abre: [] },
+        { nombre: 'Electivo 2 profesional', abre: [] },
+        { nombre: 'Electivo 3 profesional', abre: [] },
+        { nombre: 'Proyectos de inversión', abre: [] },
+        { nombre: 'Dirección gerencial', abre: [] },
+        { nombre: 'Práctica profesional', abre: [] },
+      ],
+      '10mo Semestre': [
+        { nombre: 'Taller de integración profesional', abre: [] }
+      ]
+    };
+
+    const notas = JSON.parse(localStorage.getItem('notas') || '{}');
+    const container = document.getElementById('mallaContainer');
+
+    function crearCurso(curso) {
+      const div = document.createElement('div');
+      div.className = 'course';
+      div.dataset.nombre = curso.nombre;
+
+      const span = document.createElement('span');
+      span.textContent = curso.nombre;
+      div.appendChild(span);
+
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.min = 1; input.max = 7; input.step = 0.1;
+      input.value = notas[curso.nombre] || '';
+      input.addEventListener('input', () => {
+        const v = parseFloat(input.value);
+        if (!isNaN(v)) notas[curso.nombre] = v;
+        else delete notas[curso.nombre];
+        localStorage.setItem('notas', JSON.stringify(notas));
+        actualizarUI();
+      });
+      div.appendChild(input);
+
+      return div;
+    }
+
+    function actualizarUI() {
+      const all = [...container.querySelectorAll('.course')];
+      const estado = {};
+      all.forEach(c => {
+        const valor = parseFloat(c.querySelector('input').value);
+        const nombre = c.dataset.nombre;
+        c.classList.remove('taken', 'approved', 'exam', 'reprobado', 'locked');
+        if (!isNaN(valor)) {
+          c.classList.add('taken');
+          if (valor >= 5) c.classList.add('approved');
+          else if (valor >= 4) c.classList.add('exam');
+          else c.classList.add('reprobado');
+          estado[nombre] = valor >= 4;
+        }
+      });
+
+      all.forEach(c => {
+        const nombre = c.dataset.nombre;
+        const prereqs = Object.entries(malla)
+          .flatMap(([_, arr]) => arr
+            .filter(x => (x.abre || []).includes(nombre))
+            .map(x => x.nombre));
+        if (prereqs.some(req => !estado[req])) {
+          c.classList.add('locked');
+        }
+      });
+    }
+
+    Object.entries(malla).forEach(([sem, arr]) => {
+      const col = document.createElement('div');
+      col.className = 'semester';
+      const h2 = document.createElement('h2');
+      h2.textContent = sem;
+      col.appendChild(h2);
+      arr.forEach(curso => col.appendChild(crearCurso(curso)));
+      container.appendChild(col);
+    });
+
+    actualizarUI();
+  </script>
+</body>
+</html>
