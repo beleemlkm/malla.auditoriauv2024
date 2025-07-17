@@ -1,298 +1,336 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>📚 Malla Curricular Interactiva 🎓</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
-<style>
-  /* Paleta pastel con fondo lila */
-  body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #d9c7f9; /* lila pastel */
-    color: #3a2a5f;
-    margin: 20px;
-    padding: 0;
-  }
-
-  h1 {
-    text-align: center;
-    color: #5a2393; /* morado fuerte */
-    font-weight: 700;
-    font-size: 2.8rem;
-    margin-bottom: 10px;
-  }
-
-  /* Contenedor principal: horizontal scroll para semestres */
-  #contenedor {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-    padding-bottom: 10px;
-  }
-
-  /* Cada semestre en columna */
-  .semestre {
-    background: #f7e8ff; /* lila muy claro */
-    border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(90, 35, 147, 0.2);
-    padding: 15px 20px;
-    min-width: 280px;
-    flex-shrink: 0;
-  }
-
-  .semestre h2 {
-    text-align: center;
-    margin-bottom: 15px;
-    color: #5a2393;
-    font-weight: 600;
-    font-size: 1.6rem;
-    user-select: none;
-  }
-
-  /* Ramo estilo cuaderno pastel */
-  .ramo {
-    background-color: #fff0f6; /* rosa pastel */
-    border-left: 6px solid #a1cfff; /* azul pastel */
-    border-radius: 10px;
-    padding: 10px 15px;
-    margin-bottom: 12px;
-    box-shadow: 0 3px 6px rgba(90, 35, 147, 0.12);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: border-color 0.3s ease, background-color 0.3s ease;
-  }
-
-  /* Cambios de color por estado */
-  .ramo.reprobado {
-    border-left-color: #f66a6a; /* rojo pastel */
-    background-color: #fdeaea;
-  }
-  .ramo.examen {
-    border-left-color: #f7c677; /* amarillo pastel */
-    background-color: #fff9e6;
-  }
-  .ramo.eximido {
-    border-left-color: #8fc77b; /* verde pastel */
-    background-color: #ebf6e8;
-  }
-
-  /* Label del ramo */
-  .ramo label {
-    flex-grow: 1;
-    margin-right: 12px;
-    font-weight: 500;
-    font-size: 1rem;
-  }
-
-  /* Input para nota */
-  .ramo input[type="number"] {
-    width: 55px;
-    padding: 5px 8px;
-    font-size: 1rem;
-    border-radius: 8px;
-    border: 1.8px solid #ccc;
-    text-align: center;
-    transition: border-color 0.3s ease;
-  }
-
-  /* Input deshabilitado */
-  .ramo input[type="number"]:disabled {
-    background-color: #ddd;
-    border-color: #aaa;
-    cursor: not-allowed;
-  }
-
-  /* Al pasar el mouse sobre ramo habilitado */
-  .ramo:hover:not(.reprobado):not(.examen):not(.eximido) {
-    border-left-color: #5a2393;
-    background-color: #f1e6ff;
-  }
-
-  /* Scrollbar para #contenedor */
-  #contenedor::-webkit-scrollbar {
-    height: 10px;
-  }
-  #contenedor::-webkit-scrollbar-track {
-    background: #e0d7ff;
-    border-radius: 10px;
-  }
-  #contenedor::-webkit-scrollbar-thumb {
-    background: #5a2393;
-    border-radius: 10px;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Malla Curricular Interactiva 📚🌸🐱</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #e6d7f2; /* lila pastel */
+      margin: 20px;
+      color: #4a3c68;
+      min-height: 100vh;
+    }
+    h1 {
+      text-align: center;
+      color: #5b2e7d; /* morado fuerte */
+      font-weight: 700;
+      margin-bottom: 30px;
+      user-select: none;
+    }
+    /* Contenedor horizontal por semestres */
+    #contenedor {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      padding-bottom: 20px;
+    }
+    /* Cada semestre como columna */
+    .semestre {
+      background: #f9f2fc; /* rosa muy pastel */
+      border-radius: 16px;
+      box-shadow: 0 6px 12px rgba(91, 46, 125, 0.15);
+      padding: 20px;
+      min-width: 280px;
+      flex-shrink: 0;
+      position: relative;
+      border: 2px solid #c8a4e7;
+    }
+    .semestre h2 {
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 1.4rem;
+      user-select: none;
+    }
+    /* Sticker decorativo arriba derecha */
+    .sticker {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 1.8rem;
+      user-select: none;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+    /* Ramo */
+    .ramo {
+      background: #ffffffcc;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin: 10px 0;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color 0.3s ease, border-left-color 0.3s ease;
+      border-left: 8px solid #a1cfff; /* azul pastel por defecto */
+      user-select: none;
+      cursor: default;
+    }
+    .ramo.cursado {
+      /* No tachar, solo bajamos opacidad y cambia borde */
+      opacity: 0.7;
+      border-left-color: #8fc77b; /* verde pastel para aprobado */
+      cursor: default;
+    }
+    .ramo.reprobado {
+      border-left-color: #f77;
+      opacity: 0.9;
+    }
+    .ramo.examen {
+      border-left-color: #f7c677;
+      opacity: 0.7;
+    }
+    .ramo.eximido {
+      border-left-color: #8fc77b;
+      opacity: 0.7;
+    }
+    /* Nombre del ramo */
+    label {
+      flex: 1;
+      padding-right: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      user-select: text;
+    }
+    /* Input de nota */
+    input[type="number"] {
+      width: 50px;
+      padding: 6px 8px;
+      font-size: 1rem;
+      border: 2px solid #c8a4e7;
+      border-radius: 10px;
+      text-align: center;
+      transition: border-color 0.3s ease;
+    }
+    input[type="number"]:focus {
+      outline: none;
+      border-color: #5b2e7d;
+      background-color: #f3e9ff;
+    }
+    /* Input deshabilitado */
+    input[disabled] {
+      background-color: #eee;
+      cursor: not-allowed;
+      color: #aaa;
+      border-color: #ddd;
+    }
+    /* Hover para ramo habilitado */
+    .ramo:not(.bloqueado):hover {
+      background-color: #f6e7ff;
+      box-shadow: 0 6px 12px rgba(91, 46, 125, 0.3);
+    }
+    /* Etiquetas de estado al lado del input */
+    .estado {
+      margin-left: 10px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      font-family: monospace;
+      user-select: none;
+      min-width: 70px;
+      text-align: center;
+      border-radius: 8px;
+      padding: 4px 6px;
+      color: white;
+    }
+    .reprobado .estado {
+      background-color: #e04c4c;
+    }
+    .examen .estado {
+      background-color: #d6b32b;
+    }
+    .eximido .estado {
+      background-color: #3ca34d;
+    }
+    .cursado:not(.reprobado):not(.examen):not(.eximido) .estado {
+      background-color: #3ca34d;
+    }
+  </style>
 </head>
 <body>
-  <h1>📚 Malla Curricular Interactiva 🎓</h1>
+  <h1>📚 Malla Curricular Interactiva 🌸🐱</h1>
   <div id="contenedor"></div>
 
-<script>
-  const ramos = [
-    // Primer semestre
-    { nombre: "Introducción a la contabilidad", semestre: 1, abre: ["Contabilidad financiera"] },
-    { nombre: "Normativa empresarial I", semestre: 1, abre: ["Normativa empresarial II"] },
-    { nombre: "Gestión de organizaciones I", semestre: 1, abre: ["Gestión de organizaciones II"] },
-    { nombre: "Lengua materna y autorregulación", semestre: 1 },
-    { nombre: "Matemáticas I", semestre: 1, abre: ["Matemáticas II", "Economía I"] },
+  <script>
+    const ramos = [
+      { nombre: "Introducción a la contabilidad", semestre: 1, abre: ["Contabilidad financiera"] },
+      { nombre: "Normativa empresarial I", semestre: 1, abre: ["Normativa empresarial II"] },
+      { nombre: "Gestión de organizaciones I", semestre: 1, abre: ["Gestión de organizaciones II"] },
+      { nombre: "Lengua materna y autorregulación", semestre: 1 },
+      { nombre: "Matemáticas I", semestre: 1, abre: ["Matemáticas II", "Economía I"] },
 
-    // Segundo semestre
-    { nombre: "Contabilidad financiera", semestre: 2, requiere: ["Introducción a la contabilidad"], abre: ["Normativa contable IFRS"] },
-    { nombre: "Normativa empresarial II", semestre: 2, requiere: ["Normativa empresarial I"], abre: ["Normativa tributaria"] },
-    { nombre: "Gestión de organizaciones II", semestre: 2, requiere: ["Gestión de organizaciones I"], abre: ["Gestión de capital humano", "Gestión comercial"] },
-    { nombre: "Introducción a la auditoría", semestre: 2, abre: ["Control interno y gestión de riesgos"] },
-    { nombre: "Economía I", semestre: 2, requiere: ["Matemáticas I"], abre: ["Economía II", "Costos para la toma de decisiones I"] },
-    { nombre: "Matemáticas II", semestre: 2, requiere: ["Matemáticas I"], abre: ["Estadística"] },
+      { nombre: "Contabilidad financiera", semestre: 2, requiere: ["Introducción a la contabilidad"], abre: ["Normativa contable IFRS"] },
+      { nombre: "Normativa empresarial II", semestre: 2, requiere: ["Normativa empresarial I"], abre: ["Normativa tributaria"] },
+      { nombre: "Gestión de organizaciones II", semestre: 2, requiere: ["Gestión de organizaciones I"], abre: ["Gestión de capital humano", "Gestión comercial"] },
+      { nombre: "Introducción a la auditoría", semestre: 2, abre: ["Control interno y gestión de riesgos"] },
+      { nombre: "Economía I", semestre: 2, requiere: ["Matemáticas I"], abre: ["Economía II", "Costos para la toma de decisiones I"] },
+      { nombre: "Matemáticas II", semestre: 2, requiere: ["Matemáticas I"], abre: ["Estadística"] },
 
-    // Tercer semestre
-    { nombre: "Normativa contable IFRS", semestre: 3, requiere: ["Contabilidad financiera"], abre: ["Normativa contable NIC SP", "Taller de integración perfil UV I", "Contabilidad avanzada I", "Proyecto de investigación"] },
-    { nombre: "Normativa tributaria", semestre: 3, requiere: ["Normativa empresarial II"], abre: ["Impuestos I", "Taller de integración perfil UV I"] },
-    { nombre: "TIC para los negocios", semestre: 3, abre: ["Taller de integración perfil UV I"] },
-    { nombre: "Economía II", semestre: 3, requiere: ["Economía I"], abre: ["Taller de integración perfil UV I"] },
-    { nombre: "Estadística", semestre: 3, requiere: ["Matemáticas II"], abre: ["Estadística para los negocios", "Taller de integración perfil UV I"] },
-    { nombre: "Control interno y gestión de riesgos", semestre: 3, requiere: ["Introducción a la auditoría"], abre: ["Fundamentos de auditoría", "Ejecución de proyectos de auditoría", "Auditoría de sistemas", "Proyecto de investigación", "Práctica temprana"] },
+      { nombre: "Normativa contable IFRS", semestre: 3, requiere: ["Contabilidad financiera"], abre: ["Normativa contable NIC SP", "Taller de integración perfil UV I", "Contabilidad avanzada I", "Proyecto de investigación"] },
+      { nombre: "Normativa tributaria", semestre: 3, requiere: ["Normativa empresarial II"], abre: ["Impuestos I", "Taller de integración perfil UV I"] },
+      { nombre: "TIC para los negocios", semestre: 3, abre: ["Taller de integración perfil UV I"] },
+      { nombre: "Economía II", semestre: 3, requiere: ["Economía I"], abre: ["Taller de integración perfil UV I"] },
+      { nombre: "Estadística", semestre: 3, requiere: ["Matemáticas II"], abre: ["Estadística para los negocios", "Taller de integración perfil UV I"] },
+      { nombre: "Control interno y gestión de riesgos", semestre: 3, requiere: ["Introducción a la auditoría"], abre: ["Fundamentos de auditoría", "Ejecución de proyectos de auditoría", "Auditoría de sistemas", "Proyecto de investigación", "Práctica temprana"] },
 
-    // Cuarto semestre
-    { nombre: "Fundamentos de auditoría", semestre: 4, requiere: ["Control interno y gestión de riesgos"], abre: ["Taller de integración perfil UV I"] },
-    { nombre: "Normativa contable NIC SP", semestre: 4, requiere: ["Normativa contable IFRS"], abre: ["Práctica temprana"] },
-    { nombre: "Impuestos I", semestre: 4, requiere: ["Normativa tributaria"], abre: ["Tributación aplicada I", "Práctica temprana"] },
-    { nombre: "Costos para la toma de decisiones I", semestre: 4, requiere: ["Economía I"], abre: ["Práctica temprana"] },
-    { nombre: "Estadística para los negocios", semestre: 4, requiere: ["Estadística"], abre: ["Bases y aplicación de ciencias de datos", "Costos para la toma de decisiones II"] },
-    { nombre: "Inglés I", semestre: 4, abre: ["Inglés II"] },
+      { nombre: "Fundamentos de auditoría", semestre: 4, requiere: ["Control interno y gestión de riesgos"], abre: ["Taller de integración perfil UV I"] },
+      { nombre: "Normativa contable NIC SP", semestre: 4, requiere: ["Normativa contable IFRS"], abre: ["Práctica temprana"] },
+      { nombre: "Impuestos I", semestre: 4, requiere: ["Normativa tributaria"], abre: ["Tributación aplicada I", "Práctica temprana"] },
+      { nombre: "Costos para la toma de decisiones I", semestre: 4, requiere: ["Economía I"], abre: ["Práctica temprana"] },
+      { nombre: "Estadística para los negocios", semestre: 4, requiere: ["Estadística"], abre: ["Bases y aplicación de ciencias de datos", "Costos para la toma de decisiones II"] },
+      { nombre: "Inglés I", semestre: 4, abre: ["Inglés II"] },
 
-    // Quinto semestre
-    { nombre: "Bases y aplicación de ciencias de datos", semestre: 5, requiere: ["Estadística para los negocios"], abre: ["Ejecución de proyectos de auditoría"] },
-    { nombre: "Tributación aplicada I", semestre: 5, requiere: ["Impuestos I"], abre: ["Impuestos II"] },
-    { nombre: "Gestión de capital humano", semestre: 5, requiere: ["Gestión de organizaciones II"] },
-    { nombre: "Costos para la toma de decisiones II", semestre: 5, requiere: ["Estadística para los negocios"], abre: ["Introducción a las finanzas", "Gestión de operaciones"] },
-    { nombre: "Inglés II", semestre: 5, requiere: ["Inglés I"], abre: ["Inglés III"] },
-    { nombre: "Taller de integración perfil UV I", semestre: 5, requiere: ["Normativa contable IFRS", "Normativa tributaria", "TIC para los negocios", "Economía II", "Estadística", "Fundamentos de auditoría"], abre: ["Taller de integración perfil UV II"] },
+      { nombre: "Bases y aplicación de ciencias de datos", semestre: 5, requiere: ["Estadística para los negocios"], abre: ["Ejecución de proyectos de auditoría"] },
+      { nombre: "Tributación aplicada I", semestre: 5, requiere: ["Impuestos I"], abre: ["Impuestos II"] },
+      { nombre: "Gestión de capital humano", semestre: 5, requiere: ["Gestión de organizaciones II"] },
+      { nombre: "Costos para la toma de decisiones II", semestre: 5, requiere: ["Estadística para los negocios"], abre: ["Introducción a las finanzas", "Gestión de operaciones"] },
+      { nombre: "Inglés II", semestre: 5, requiere: ["Inglés I"], abre: ["Inglés III"] },
+      { nombre: "Taller de integración perfil UV I", semestre: 5, requiere: ["Normativa contable IFRS", "Normativa tributaria", "TIC para los negocios", "Economía II", "Estadística", "Fundamentos de auditoría"], abre: ["Taller de integración perfil UV II"] },
 
-    // Sexto semestre
-    { nombre: "Contabilidad avanzada I", semestre: 6, requiere: ["Normativa contable IFRS"], abre: ["Contabilidad avanzada II"] },
-    { nombre: "Impuestos II", semestre: 6, requiere: ["Tributación aplicada I"], abre: ["Tributación aplicada II", "Proyecto de investigación"] },
-    { nombre: "Gestión comercial", semestre: 6, requiere: ["Gestión de organizaciones II"], abre: ["Gestión de operaciones"] },
-    { nombre: "Introducción a las finanzas", semestre: 6, requiere: ["Costos para la toma de decisiones II"], abre: ["Finanzas corporativas", "Proyecto de investigación", "Gestión financiera"] },
-    { nombre: "Inglés III", semestre: 6, requiere: ["Inglés II"], abre: ["Inglés IV"] },
-    { nombre: "Taller de integración perfil UV II", semestre: 6, requiere: ["Taller de integración perfil UV I"] },
-    { nombre: "Ejecución de proyectos de auditoría", semestre: 6, requiere: ["Bases y aplicación de ciencias de datos", "Control interno y gestión de riesgos"] },
+      { nombre: "Contabilidad avanzada I", semestre: 6, requiere: ["Normativa contable IFRS"], abre: ["Contabilidad avanzada II"] },
+      { nombre: "Impuestos II", semestre: 6, requiere: ["Tributación aplicada I"], abre: ["Tributación aplicada II", "Proyecto de investigación"] },
+      { nombre: "Gestión comercial", semestre: 6, requiere: ["Gestión de organizaciones II"], abre: ["Gestión de operaciones"] },
+      { nombre: "Introducción a las finanzas", semestre: 6, requiere: ["Costos para la toma de decisiones II"], abre: ["Finanzas corporativas", "Proyecto de investigación", "Gestión financiera"] },
+      { nombre: "Inglés III", semestre: 6, requiere: ["Inglés II"], abre: ["Inglés IV"] },
+      { nombre: "Taller de integración perfil UV II", semestre: 6, requiere: ["Taller de integración perfil UV I"] },
+      { nombre: "Ejecución de proyectos de auditoría", semestre: 6, requiere: ["Bases y aplicación de ciencias de datos", "Control interno y gestión de riesgos"] },
 
-    // Séptimo semestre
-    { nombre: "Contabilidad avanzada II", semestre: 7, requiere: ["Contabilidad avanzada I"], abre: ["Contabilidad avanzada III", "Auditoría de estados financieros", "Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial", "Práctica profesional"] },
-    { nombre: "Tributación aplicada II", semestre: 7, requiere: ["Impuestos II"], abre: ["Gestión tributaria", "Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial", "Práctica profesional"] },
-    { nombre: "Gestión de operaciones", semestre: 7, requiere: ["Gestión comercial", "Costos para la toma de decisiones II"], abre: ["Planificación y control de gestión", "Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial"] },
-    { nombre: "Auditoría de sistemas", semestre: 7, requiere: ["Control interno y gestión de riesgos"], abre: ["Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial"] },
-    { nombre: "Finanzas corporativas", semestre: 7, requiere: ["Introducción a las finanzas"], abre: ["Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Formulación y evaluación de proyectos de inversión", "Dirección gerencial"] },
-    { nombre: "Inglés IV", semestre: 7, requiere: ["Inglés III"], abre: ["Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial"] },
-    { nombre: "Proyecto de investigación", semestre: 7, requiere: ["Normativa contable IFRS", "Control interno y gestión de riesgos", "Impuestos II", "Introducción a las finanzas"], abre: ["Investigación aplicada", "Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial"] },
-    { nombre: "Práctica temprana", semestre: 7, requiere: ["Normativa contable NIC SP", "Impuestos I", "Costos para la toma de decisiones I", "Control interno y gestión de riesgos"], abre: ["Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial", "Práctica profesional"] },
+      { nombre: "Contabilidad avanzada II", semestre: 7, requiere: ["Contabilidad avanzada I"], abre: ["Contabilidad avanzada III", "Auditoría de estados financieros", "Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial", "Práctica profesional"] },
+      { nombre: "Tributación aplicada II", semestre: 7, requiere: ["Impuestos II"], abre: ["Gestión tributaria", "Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial", "Práctica profesional"] },
+      { nombre: "Gestión de operaciones", semestre: 7, requiere: ["Gestión comercial", "Costos para la toma de decisiones II"], abre: ["Planificación y control de gestión", "Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial"] },
+      { nombre: "Auditoría de sistemas", semestre: 7, requiere: ["Control interno y gestión de riesgos"], abre: ["Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial"] },
+      { nombre: "Finanzas corporativas", semestre: 7, requiere: ["Introducción a las finanzas"], abre: ["Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Formulación y evaluación de proyectos de inversión", "Dirección gerencial"] },
+      { nombre: "Inglés IV", semestre: 7, requiere: ["Inglés III"], abre: ["Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial"] },
+      { nombre: "Proyecto de investigación", semestre: 7, requiere: ["Normativa contable IFRS", "Control interno y gestión de riesgos", "Impuestos II", "Introducción a las finanzas"], abre: ["Investigación aplicada", "Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial"] },
+      { nombre: "Práctica temprana", semestre: 7, requiere: ["Normativa contable NIC SP", "Impuestos I", "Costos para la toma de decisiones I", "Control interno y gestión de riesgos"], abre: ["Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial", "Práctica profesional"] },
 
-    // Octavo semestre
-    { nombre: "Contabilidad avanzada III", semestre: 8, requiere: ["Contabilidad avanzada II"], abre: ["Taller de integración profesional"] },
-    { nombre: "Gestión tributaria", semestre: 8, requiere: ["Tributación aplicada II"], abre: ["Taller de integración profesional"] },
-    { nombre: "Planificación y control de gestión", semestre: 8, requiere: ["Gestión de operaciones"], abre: ["Taller de integración profesional"] },
-    { nombre: "Auditoría de estados financieros", semestre: 8, requiere: ["Contabilidad avanzada II"], abre: ["Práctica profesional", "Taller de integración profesional"] },
-    { nombre: "Gestión financiera", semestre: 8, requiere: ["Introducción a las finanzas"], abre: ["Taller de integración profesional"] },
-    { nombre: "Investigación aplicada", semestre: 8, requiere: ["Proyecto de investigación"], abre: ["Taller de integración profesional"] },
+      { nombre: "Contabilidad avanzada III", semestre: 8, requiere: ["Contabilidad avanzada II"], abre: ["Taller de integración profesional"] },
+      { nombre: "Gestión tributaria", semestre: 8, requiere: ["Tributación aplicada II"], abre: ["Taller de integración profesional"] },
+      { nombre: "Planificación y control de gestión", semestre: 8, requiere: ["Gestión de operaciones"], abre: ["Taller de integración profesional"] },
+      { nombre: "Auditoría de estados financieros", semestre: 8, requiere: ["Contabilidad avanzada II"], abre: ["Práctica profesional", "Taller de integración profesional"] },
+      { nombre: "Gestión financiera", semestre: 8, requiere: ["Introducción a las finanzas"], abre: ["Taller de integración profesional"] },
+      { nombre: "Investigación aplicada", semestre: 8, requiere: ["Proyecto de investigación"], abre: ["Taller de integración profesional"] },
 
-    // Noveno semestre
-    { nombre: "Electivo 1 profesional", semestre: 9 },
-    { nombre: "Electivo 2 profesional", semestre: 9 },
-    { nombre: "Electivo 3 profesional", semestre: 9 },
-    { nombre: "Formulación y evaluación de proyectos de inversión", semestre: 9, requiere: ["Finanzas corporativas"] },
-    { nombre: "Dirección gerencial", semestre: 9 },
-    { nombre: "Práctica profesional", semestre: 9 },
+      { nombre: "Electivo 1 profesional", semestre: 9 },
+      { nombre: "Electivo 2 profesional", semestre: 9 },
+      { nombre: "Electivo 3 profesional", semestre: 9 },
+      { nombre: "Formulación y evaluación de proyectos de inversión", semestre: 9, requiere: ["Finanzas corporativas"] },
+      { nombre: "Dirección gerencial", semestre: 9 },
+      { nombre: "Práctica profesional", semestre: 9 },
 
-    // Décimo semestre
-    { nombre: "Taller de integración profesional", semestre: 10 }
-  ];
+      { nombre: "Taller de integración profesional", semestre: 10 }
+    ];
 
-  const contenedor = document.getElementById("contenedor");
-  const estados = JSON.parse(localStorage.getItem("estadoRamos") || '{}');
+    const contenedor = document.getElementById("contenedor");
+    let estados = JSON.parse(localStorage.getItem("estadoRamos") || '{}');
 
-  function actualizarLocalStorage() {
-    localStorage.setItem("estadoRamos", JSON.stringify(estados));
-  }
+    function actualizarLocalStorage() {
+      localStorage.setItem("estadoRamos", JSON.stringify(estados));
+    }
 
-  // Función para determinar el estado del ramo según nota
-  function evaluar(nota) {
-    if (nota === "") return "";
-    const n = parseFloat(nota);
-    if (n < 4.0) return "reprobado";
-    if (n >= 5.0) return "eximido";
-    return "examen"; // 4.0 a 4.9
-  }
+    // Evalúa nota y retorna estado string para clases CSS
+    function evaluar(nota) {
+      if (nota === "") return "";
+      const n = parseFloat(nota);
+      if (n < 4.0) return "reprobado";
+      if (n >= 5.0) return "eximido";
+      return "examen";
+    }
 
-  // Actualiza nota y refresca render
-  function actualizarEstado(nombre, nota) {
-    estados[nombre] = nota;
-    actualizarLocalStorage();
-    render();
-  }
+    // Devuelve true si se aprueban requisitos para este ramo
+    function cumpleRequisitos(ramo) {
+      if (!ramo.requiere || ramo.requiere.length === 0) return true;
+      return ramo.requiere.every(req => {
+        const notaReq = parseFloat(estados[req]);
+        return notaReq >= 4.0;
+      });
+    }
 
-  // Verifica si los requisitos están aprobados con nota >= 4.0
-  function cumpleRequisitos(ramo) {
-    if (!ramo.requiere) return true;
-    return ramo.requiere.every(req => {
-      const notaReq = parseFloat(estados[req] || 0);
-      return notaReq >= 4.0;
-    });
-  }
+    // Actualiza nota y rerenderiza
+    function actualizarEstado(nombre, nota) {
+      estados[nombre] = nota;
+      actualizarLocalStorage();
+      render();
+    }
 
-  // Renderiza toda la malla curricular
-  function render() {
-    contenedor.innerHTML = "";
+    // Renderiza toda la malla
+    function render() {
+      contenedor.innerHTML = "";
 
-    // Recorrer semestres del 1 al 10
-    for (let s = 1; s <= 10; s++) {
-      const divSemestre = document.createElement("div");
-      divSemestre.classList.add("semestre");
-      const h2 = document.createElement("h2");
-      h2.textContent = `Semestre ${s}`;
-      divSemestre.appendChild(h2);
+      for (let s = 1; s <= 10; s++) {
+        const semestre = document.createElement("div");
+        semestre.classList.add("semestre");
 
-      // Filtra ramos del semestre s
-      const ramosDelSemestre = ramos.filter(r => r.semestre === s);
+        // Sticker lindo por semestre (cambia icono para variedad)
+        const stickers = ["🐱","🌸","📖","🐰","🌼","🐝","📚","🌻","🦄","🍀"];
+        const stickerSpan = document.createElement("span");
+        stickerSpan.classList.add("sticker");
+        stickerSpan.textContent = stickers[s - 1];
+        semestre.appendChild(stickerSpan);
 
-      ramosDelSemestre.forEach(ramo => {
-        const divRamo = document.createElement("div");
-        divRamo.classList.add("ramo");
+        const titulo = document.createElement("h2");
+        titulo.textContent = `Semestre ${s}`;
+        semestre.appendChild(titulo);
 
-        const nota = estados[ramo.nombre] || "";
-        const estado = evaluar(nota);
+        ramos.filter(r => r.semestre === s).forEach(ramo => {
+          const div = document.createElement("div");
+          div.classList.add("ramo");
 
-        // Cambiar color según estado
-        if (estado) divRamo.classList.add(estado);
+          const nota = estados[ramo.nombre] || "";
+          const estado = evaluar(nota);
 
-        // Bloquear input si no cumple requisitos o está reprobado
-        const habilitado = cumpleRequisitos(ramo) && estado !== "reprobado";
+          if (estado) div.classList.add(estado);
 
-        const label = document.createElement("label");
-        label.textContent = ramo.nombre;
+          // Bloquear si no cumple requisitos o está reprobado o sin nota
+          const habilitado = cumpleRequisitos(ramo) && (nota === "" || estado !== "reprobado");
 
-        const input = document.createElement("input");
-        input.type = "number";
-        input.min = "1";
-        input.max = "7";
-        input.step = "0.1";
-        input.value = nota;
-        input.disabled = !habilitado;
+          if (!habilitado) {
+            div.classList.add("bloqueado");
+          }
 
-        input.addEventListener("change", () => {
-          actualizarEstado(ramo.nombre, input.value);
+          // No tachar aunque tenga nota
+          if (nota !== "" && estado !== "reprobado") {
+            div.classList.add("cursado");
+          }
+
+          const label = document.createElement("label");
+          label.textContent = ramo.nombre;
+
+          const input = document.createElement("input");
+          input.type = "number";
+          input.min = "1";
+          input.max = "7";
+          input.step = "0.1";
+          input.value = nota;
+          input.disabled = !habilitado;
+
+          input.addEventListener("change", () => {
+            actualizarEstado(ramo.nombre, input.value);
+          });
+
+          // Mostrar estado textual al lado del input
+          const estadoSpan = document.createElement("span");
+          estadoSpan.classList.add("estado");
+          if (estado === "reprobado") estadoSpan.textContent = "Reprobado";
+          else if (estado === "examen") estadoSpan.textContent = "Examen";
+          else if (estado === "eximido") estadoSpan.textContent = "Eximido";
+          else if (nota !== "") estadoSpan.textContent = "Aprobado";
+          else estadoSpan.textContent = "";
+
+          div.appendChild(label);
+          div.appendChild(input);
+          div.appendChild(estadoSpan);
+
+          semestre.appendChild(div);
         });
 
-        divRamo.appendChild(label);
-        divRamo.appendChild(input);
-        divSemestre.appendChild(divRamo);
-      });
-
-      contenedor.appendChild(divSemestre);
+        contenedor.appendChild(semestre);
+      }
     }
-  }
 
-  render();
-</script>
+    render();
+  </script>
 </body>
 </html>
