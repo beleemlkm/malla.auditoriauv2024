@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Aptos&display=swap');
 
 :root {
@@ -29,10 +30,25 @@ h1 {
   margin-bottom: 2rem;
 }
 
-#contenedor {
+.semestre {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  transition: all 0.3s ease;
+}
+
+.semestre h2 {
+  color: #888;
+  margin-top: 0;
+}
+
+.ramos {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1rem;
+  margin-top: 1rem;
 }
 
 .ramo {
@@ -41,44 +57,53 @@ h1 {
   padding: 1rem;
   border-radius: 8px;
   cursor: pointer;
+  transition: transform 0.2s, background 0.3s;
   position: relative;
+  overflow: hidden;
   font-weight: bold;
-  user-select: none;
-  transition: background-color 0.3s, border-color 0.3s, color 0.3s;
 }
 
-.ramo input[type="number"] {
-  margin-top: 0.5rem;
-  width: 90px;
-  border-radius: 4px;
-  border: 1px solid #aaa;
-  padding: 0.2rem 0.4rem;
-  font-size: 1rem;
+.ramo:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ramo::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--tachado),
+    var(--tachado) 2px,
+    transparent 2px,
+    transparent 4px
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.ramo.aprobado::before {
+  opacity: 1;
 }
 
 .ramo.aprobado,
 .ramo.eximido {
-  background-color: #c4f0c5; /* verde pastel */
+  background-color: var(--verde);
   border-color: #6fcf97;
   color: #555;
   text-decoration: line-through;
 }
 
 .ramo.reprobado {
-  background-color: #f8d4d4; /* rojo pastel */
+  background-color: #f8d4d4;
   border-color: #f44336;
   color: #a00;
   text-decoration: line-through;
-}
-
-.ramo.bloqueado {
-  background-color: #ddd !important;
-  border-color: #999 !important;
-  color: #666 !important;
-  cursor: not-allowed;
-  pointer-events: none;
-  opacity: 0.6;
-  text-decoration: none !important;
 }
 
 .estado {
@@ -90,4 +115,13 @@ h1 {
   padding: 0.3rem 0.5rem;
   border-radius: 6px;
   display: inline-block;
+}
+.ramo.bloqueado {
+  background-color: #cccccc !important;
+  border-color: #999999 !important;
+  color: #666666 !important;
+  cursor: not-allowed;
+  text-decoration: none !important;
+  pointer-events: none; /* Impide interacción */
+  opacity: 0.6;
 }
