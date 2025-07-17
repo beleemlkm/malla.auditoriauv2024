@@ -2,103 +2,201 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Malla Curricular - Auditoría</title>
-  <link rel="stylesheet" href="css/estilos.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Malla Curricular Interactiva</title>
   <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fdf6f9;
+      color: #333;
+      padding: 20px;
+    }
+    h1 {
+      color: #6b2d7c;
+      text-align: center;
+    }
+    .semestre {
+      margin: 30px 0;
+    }
     .ramo {
-      padding: 5px;
-      border: 1px solid #ccc;
-      margin: 4px;
-      cursor: pointer;
-      border-radius: 4px;
+      background-color: #fff;
+      border-left: 8px solid #a1cfff;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 10px 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .ramo.aprobado {
-      background-color: #d4edda;
+    .ramo.cursado {
+      text-decoration: line-through;
+      opacity: 0.6;
     }
-    .nota-input {
-      margin-left: 10px;
+    .ramo.reprobado {
+      border-left-color: #f77;
+    }
+    .ramo.examen {
+      border-left-color: #f7c677;
+    }
+    .ramo.eximido {
+      border-left-color: #8fc77b;
+    }
+    input[type="number"] {
       width: 60px;
+      padding: 4px;
+      font-size: 1em;
     }
   </style>
 </head>
 <body>
-  <h1>Malla Curricular - Auditoría</h1>
+  <h1>Malla Curricular Interactiva</h1>
   <div id="contenedor"></div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const ramos = document.querySelectorAll(".ramo");
+    const ramos = [
+      { nombre: "Introducción a la contabilidad", semestre: 1, abre: ["Contabilidad financiera"] },
+      { nombre: "Normativa empresarial I", semestre: 1, abre: ["Normativa empresarial II"] },
+      { nombre: "Gestión de organizaciones I", semestre: 1, abre: ["Gestión de organizaciones II"] },
+      { nombre: "Lengua materna y autorregulación", semestre: 1 },
+      { nombre: "Matemáticas I", semestre: 1, abre: ["Matemáticas II", "Economía I"] },
 
-      ramos.forEach((ramo) => {
-        const nombre = ramo.textContent.trim();
+      { nombre: "Contabilidad financiera", semestre: 2, requiere: ["Introducción a la contabilidad"], abre: ["Normativa contable IFRS"] },
+      { nombre: "Normativa empresarial II", semestre: 2, requiere: ["Normativa empresarial I"], abre: ["Normativa tributaria"] },
+      { nombre: "Gestión de organizaciones II", semestre: 2, requiere: ["Gestión de organizaciones I"], abre: ["Gestión de capital humano", "Gestión comercial"] },
+      { nombre: "Introducción a la auditoría", semestre: 2, abre: ["Control interno y gestión de riesgos"] },
+      { nombre: "Economía I", semestre: 2, requiere: ["Matemáticas I"], abre: ["Economía II", "Costos para la toma de decisiones I"] },
+      { nombre: "Matemáticas II", semestre: 2, requiere: ["Matemáticas I"], abre: ["Estadística"] },
 
-        if (!ramo.querySelector("input")) {
-          const input = document.createElement("input");
-          input.type = "number";
-          input.min = "1.0";
-          input.max = "7.0";
-          input.step = "0.1";
-          input.classList.add("nota-input");
-          input.placeholder = "Nota";
+      { nombre: "Normativa contable IFRS", semestre: 3, requiere: ["Contabilidad financiera"], abre: ["Normativa contable NIC SP", "Taller de integración perfil UV I", "Contabilidad avanzada I", "Proyecto de investigación"] },
+      { nombre: "Normativa tributaria", semestre: 3, requiere: ["Normativa empresarial II"], abre: ["Impuestos I", "Taller de integración perfil UV I"] },
+      { nombre: "TIC para los negocios", semestre: 3, abre: ["Taller de integración perfil UV I"] },
+      { nombre: "Economía II", semestre: 3, requiere: ["Economía I"], abre: ["Taller de integración perfil UV I"] },
+      { nombre: "Estadística", semestre: 3, requiere: ["Matemáticas II"], abre: ["Estadística para los negocios", "Taller de integración perfil UV I"] },
+      { nombre: "Control interno y gestión de riesgos", semestre: 3, requiere: ["Introducción a la auditoría"], abre: ["Fundamentos de auditoría", "Ejecución de proyectos de auditoría", "Auditoría de sistemas", "Proyecto de investigación", "Práctica temprana"] },
 
-          const savedNota = localStorage.getItem(`nota-${nombre}`);
-          if (savedNota) {
-            input.value = savedNota;
-          }
+      { nombre: "Fundamentos de auditoría", semestre: 4, requiere: ["Control interno y gestión de riesgos"], abre: ["Taller de integración perfil UV I"] },
+      { nombre: "Normativa contable NIC SP", semestre: 4, requiere: ["Normativa contable IFRS"], abre: ["Práctica temprana"] },
+      { nombre: "Impuestos I", semestre: 4, requiere: ["Normativa tributaria"], abre: ["Tributación aplicada I", "Práctica temprana"] },
+      { nombre: "Costos para la toma de decisiones I", semestre: 4, requiere: ["Economía I"], abre: ["Práctica temprana"] },
+      { nombre: "Estadística para los negocios", semestre: 4, requiere: ["Estadística"], abre: ["Bases y aplicación de ciencias de datos", "Costos para la toma de decisiones II"] },
+      { nombre: "Inglés I", semestre: 4, abre: ["Inglés II"] },
 
-          input.addEventListener("input", () => {
-            localStorage.setItem(`nota-${nombre}`, input.value);
-            actualizarEstado(ramo);
-            actualizarBloqueos();
-          });
+      { nombre: "Bases y aplicación de ciencias de datos", semestre: 5, requiere: ["Estadística para los negocios"], abre: ["Ejecución de proyectos de auditoría"] },
+      { nombre: "Tributación aplicada I", semestre: 5, requiere: ["Impuestos I"], abre: ["Impuestos II"] },
+      { nombre: "Gestión de capital humano", semestre: 5, requiere: ["Gestión de organizaciones II"] },
+      { nombre: "Costos para la toma de decisiones II", semestre: 5, requiere: ["Estadística para los negocios"], abre: ["Introducción a las finanzas", "Gestión de operaciones"] },
+      { nombre: "Inglés II", semestre: 5, requiere: ["Inglés I"], abre: ["Inglés III"] },
+      { nombre: "Taller de integración perfil UV I", semestre: 5, requiere: ["Normativa contable IFRS", "Normativa tributaria", "TIC para los negocios", "Economía II", "Estadística", "Fundamentos de auditoría"], abre: ["Taller de integración perfil UV II"] },
 
-          ramo.appendChild(input);
-        }
+      { nombre: "Contabilidad avanzada I", semestre: 6, requiere: ["Normativa contable IFRS"], abre: ["Contabilidad avanzada II"] },
+      { nombre: "Impuestos II", semestre: 6, requiere: ["Tributación aplicada I"], abre: ["Tributación aplicada II", "Proyecto de investigación"] },
+      { nombre: "Gestión comercial", semestre: 6, requiere: ["Gestión de organizaciones II"], abre: ["Gestión de operaciones"] },
+      { nombre: "Introducción a las finanzas", semestre: 6, requiere: ["Costos para la toma de decisiones II"], abre: ["Finanzas corporativas", "Proyecto de investigación", "Gestión financiera"] },
+      { nombre: "Inglés III", semestre: 6, requiere: ["Inglés II"], abre: ["Inglés IV"] },
+      { nombre: "Taller de integración perfil UV II", semestre: 6, requiere: ["Taller de integración perfil UV I"] },
+      { nombre: "Ejecución de proyectos de auditoría", semestre: 6, requiere: ["Bases y aplicación de ciencias de datos", "Control interno y gestión de riesgos"] },
 
-        const savedNota = localStorage.getItem(`nota-${nombre}`);
-        if (savedNota && parseFloat(savedNota) >= 4.0) {
-          ramo.classList.add("aprobado");
-        }
-      });
+      { nombre: "Contabilidad avanzada II", semestre: 7, requiere: ["Contabilidad avanzada I"], abre: ["Contabilidad avanzada III", "Auditoría de estados financieros", "Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial", "Práctica profesional"] },
+      { nombre: "Tributación aplicada II", semestre: 7, requiere: ["Impuestos II"], abre: ["Gestión tributaria", "Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial", "Práctica profesional"] },
+      { nombre: "Gestión de operaciones", semestre: 7, requiere: ["Gestión comercial", "Costos para la toma de decisiones II"], abre: ["Planificación y control de gestión", "Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial"] },
+      { nombre: "Auditoría de sistemas", semestre: 7, requiere: ["Control interno y gestión de riesgos"], abre: ["Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial"] },
+      { nombre: "Finanzas corporativas", semestre: 7, requiere: ["Introducción a las finanzas"], abre: ["Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Formulación y evaluación de proyectos de inversión", "Dirección gerencial"] },
+      { nombre: "Inglés IV", semestre: 7, requiere: ["Inglés III"], abre: ["Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial"] },
+      { nombre: "Proyecto de investigación", semestre: 7, requiere: ["Normativa contable IFRS", "Control interno y gestión de riesgos", "Impuestos II", "Introducción a las finanzas"], abre: ["Investigación aplicada", "Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial"] },
+      { nombre: "Práctica temprana", semestre: 7, requiere: ["Normativa contable NIC SP", "Impuestos I", "Costos para la toma de decisiones I", "Control interno y gestión de riesgos"], abre: ["Electivo 1 profesional", "Electivo 2 profesional", "Electivo 3 profesional", "Dirección gerencial", "Práctica profesional"] },
 
-      function actualizarEstado(ramo) {
-        const notaInput = ramo.querySelector("input");
-        const nota = parseFloat(notaInput.value);
-        if (!isNaN(nota) && nota >= 4.0) {
-          ramo.classList.add("aprobado");
-        } else {
-          ramo.classList.remove("aprobado");
-        }
-      }
+      { nombre: "Contabilidad avanzada III", semestre: 8, requiere: ["Contabilidad avanzada II"], abre: ["Taller de integración profesional"] },
+      { nombre: "Gestión tributaria", semestre: 8, requiere: ["Tributación aplicada II"], abre: ["Taller de integración profesional"] },
+      { nombre: "Planificación y control de gestión", semestre: 8, requiere: ["Gestión de operaciones"], abre: ["Taller de integración profesional"] },
+      { nombre: "Auditoría de estados financieros", semestre: 8, requiere: ["Contabilidad avanzada II"], abre: ["Práctica profesional", "Taller de integración profesional"] },
+      { nombre: "Gestión financiera", semestre: 8, requiere: ["Introducción a las finanzas"], abre: ["Taller de integración profesional"] },
+      { nombre: "Investigación aplicada", semestre: 8, requiere: ["Proyecto de investigación"], abre: ["Taller de integración profesional"] },
 
-      function actualizarBloqueos() {
-        document.querySelectorAll(".ramo").forEach((ramo) => {
-          const requisitos = ramo.getAttribute("data-prerrequisitos");
-          const notaInput = ramo.querySelector("input");
+      { nombre: "Electivo 1 profesional", semestre: 9 },
+      { nombre: "Electivo 2 profesional", semestre: 9 },
+      { nombre: "Electivo 3 profesional", semestre: 9 },
+      { nombre: "Formulación y evaluación de proyectos de inversión", semestre: 9, requiere: ["Finanzas corporativas"] },
+      { nombre: "Dirección gerencial", semestre: 9 },
+      { nombre: "Práctica profesional", semestre: 9 },
 
-          if (requisitos) {
-            const nombres = requisitos.split(",").map(r => r.trim());
-            const cumple = nombres.every(nombre => {
-              const nota = parseFloat(localStorage.getItem(`nota-${nombre}`));
-              return !isNaN(nota) && nota >= 4.0;
-            });
+      { nombre: "Taller de integración profesional", semestre: 10 }
+    ];
 
-            if (!cumple) {
-              ramo.classList.add("bloqueado");
-              notaInput.disabled = true;
-              notaInput.value = "";
-            } else {
-              ramo.classList.remove("bloqueado");
-              notaInput.disabled = false;
-              const saved = localStorage.getItem(`nota-${ramo.textContent.trim()}`);
-              if (saved) notaInput.value = saved;
+    const contenedor = document.getElementById("contenedor");
+    const estados = JSON.parse(localStorage.getItem("estadoRamos") || '{}');
+
+    function actualizarLocalStorage() {
+      localStorage.setItem("estadoRamos", JSON.stringify(estados));
+    }
+
+    function evaluar(nota) {
+      if (nota === "") return "";
+      const n = parseFloat(nota);
+      if (n < 4.0) return "reprobado";
+      if (n >= 5.0) return "eximido";
+      return "examen";
+    }
+
+    function actualizarEstado(nombre, nota) {
+      estados[nombre] = nota;
+      actualizarLocalStorage();
+      render();
+    }
+
+    function render() {
+      contenedor.innerHTML = "";
+      for (let s = 1; s <= 10; s++) {
+        const semestre = document.createElement("div");
+        semestre.classList.add("semestre");
+        const titulo = document.createElement("h2");
+        titulo.textContent = `Semestre ${s}`;
+        semestre.appendChild(titulo);
+
+        ramos.filter(r => r.semestre === s).forEach(ramo => {
+          const div = document.createElement("div");
+          div.classList.add("ramo");
+          const nota = estados[ramo.nombre] || "";
+          const estado = evaluar(nota);
+
+          if (estado) div.classList.add(estado);
+          if (estado !== "reprobado" && estado !== "") div.classList.add("cursado");
+
+          let habilitado = true;
+          if (ramo.requiere) {
+            for (const req of ramo.requiere) {
+              const notaReq = parseFloat(estados[req] || 0);
+              if (notaReq < 4.0) {
+                habilitado = false;
+                break;
+              }
             }
           }
-        });
-      }
 
-      actualizarBloqueos();
-    });
+          const label = document.createElement("label");
+          label.textContent = ramo.nombre;
+          const input = document.createElement("input");
+          input.type = "number";
+          input.min = "1";
+          input.max = "7";
+          input.step = "0.1";
+          input.value = nota;
+          input.disabled = !habilitado;
+
+          input.addEventListener("change", () => {
+            actualizarEstado(ramo.nombre, input.value);
+          });
+
+          div.appendChild(label);
+          div.appendChild(input);
+          semestre.appendChild(div);
+        });
+
+        contenedor.appendChild(semestre);
+      }
+    }
+
+    render();
   </script>
 </body>
 </html>
