@@ -2,259 +2,188 @@
 
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📘🐱 Malla Curricular Auditoría UV 🌸</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📘 Malla Auditoría UV 🐱🌸</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
     body {
-      margin: 0;
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #fce4ec, #e0f7fa);
-      background-attachment: fixed;
-      background-size: cover;
-      padding: 20px;
-      overflow-x: auto;
+      background: linear-gradient(to right, #fef6ff, #f9fcff);
+      margin: 0;
+      padding: 2rem;
+      color: #333;
     }
-
-```
-h1 {
-  text-align: center;
-  color: #6a1b9a;
-  font-size: 2.5em;
-  margin-bottom: 30px;
-}
-
-.malla {
-  display: flex;
-  gap: 30px;
-  align-items: flex-start;
-}
-
-.semestre {
-  background: #ffffffcc;
-  border: 2px dashed #ce93d8;
-  border-radius: 20px;
-  padding: 15px;
-  min-width: 250px;
-  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
-  position: relative;
-}
-
-.semestre:hover {
-  transform: translateY(-5px);
-  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.15);
-}
-
-.semestre h2 {
-  text-align: center;
-  color: #4a148c;
-  margin-bottom: 10px;
-}
-
-.ramo {
-  margin: 10px 0;
-  background-color: #f3e5f5;
-  border-left: 5px solid #ba68c8;
-  border-radius: 10px;
-  padding: 10px;
-  position: relative;
-  transition: background-color 0.3s;
-}
-
-.ramo:hover {
-  background-color: #e1bee7;
-}
-
-.ramo input {
-  width: 50px;
-  padding: 3px;
-  margin-top: 5px;
-}
-
-.ramo.aprobado {
-  text-decoration: line-through;
-  background-color: #c8e6c9 !important;
-}
-
-.ramo.examen {
-  background-color: #fff9c4 !important;
-}
-
-.ramo.reprobado {
-  background-color: #ffcdd2 !important;
-}
-
-.stickers {
-  position: absolute;
-  top: -15px;
-  right: -15px;
-  width: 40px;
-}
-
-.ramo .emoji {
-  font-size: 1.2em;
-  margin-right: 5px;
-}
-
-.cuadro-icono {
-  position: absolute;
-  bottom: -20px;
-  right: -15px;
-  font-size: 24px;
-  opacity: 0.6;
-}
-```
-
+    h1 {
+      text-align: center;
+      color: #6a0dad;
+      font-size: 2rem;
+    }
+    .semestres {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      padding: 1rem;
+    }
+    .semestre {
+      background: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 1rem;
+      min-width: 220px;
+      flex-shrink: 0;
+    }
+    .semestre h2 {
+      text-align: center;
+      color: #6a0dad;
+    }
+    .ramo {
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      background: #fafafa;
+      transition: background 0.3s, transform 0.2s;
+      position: relative;
+      border: 1px solid #ddd;
+    }
+    .ramo.locked {
+      background: #f3f3f3;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    .ramo.aprobado {
+      text-decoration: line-through;
+      background: #e0f7e9;
+    }
+    .ramo.aprobado-examen {
+      text-decoration: line-through;
+      background: #fff6d6;
+    }
+    .ramo.reprobado {
+      text-decoration: line-through;
+      background: #ffe6e6;
+    }
+    .ramo:hover {
+      background: #f0eaff;
+      transform: scale(1.01);
+    }
+    input {
+      width: 3rem;
+      margin-left: 0.5rem;
+    }
   </style>
 </head>
 <body>
-  <h1>📘🐱 Malla Curricular Auditoría UV 🌸</h1>
-  <div class="malla" id="malla"></div>
-
+  <h1>📘 Malla Curricular Auditoría UV 🐱🌸</h1>
+  <div class="semestres" id="malla"></div>
   <script>
-    const data = [
+    const datos = [
       {
-        semestre: '1° Semestre',
+        semestre: "Primer semestre",
         ramos: [
-          '📖 Introducción a la contabilidad',
-          '📚 Normativa empresarial I',
-          '🏢 Gestión de organizaciones I',
-          '✍️ Lengua materna y autorregulación',
-          '📐 Matemáticas I'
-        ]
+          { nombre: "Introducción a la contabilidad", abre: ["Contabilidad financiera"] },
+          { nombre: "Normativa empresarial I", abre: ["Normativa empresarial II"] },
+          { nombre: "Gestión de organizaciones I", abre: ["Gestión de organizaciones II"] },
+          { nombre: "Lengua materna y autorregulación" },
+          { nombre: "Matemáticas I", abre: ["Matemáticas II", "Economía I"] },
+        ],
       },
       {
-        semestre: '2° Semestre',
+        semestre: "Segundo semestre",
         ramos: [
-          '📊 Contabilidad financiera',
-          '⚖️ Normativa empresarial II',
-          '🧭 Gestión de organizaciones II',
-          '🕵️‍♂️ Introducción a la auditoría',
-          '💸 Economía I',
-          '📏 Matemáticas II'
-        ]
+          { nombre: "Contabilidad financiera", abre: ["Normativa contable IFRS"], dependeDe: ["Introducción a la contabilidad"] },
+          { nombre: "Normativa empresarial II", abre: ["Normativa tributaria"], dependeDe: ["Normativa empresarial I"] },
+          { nombre: "Gestión de organizaciones II", abre: ["Gestión de capital humano", "Gestión comercial"], dependeDe: ["Gestión de organizaciones I"] },
+          { nombre: "Introducción a la auditoría", abre: ["Control interno y gestión de riesgos"] },
+          { nombre: "Economía I", abre: ["Economía II", "Costos para la toma de decisiones I"], dependeDe: ["Matemáticas I"] },
+          { nombre: "Matemáticas II", abre: ["Estadística"], dependeDe: ["Matemáticas I"] },
+        ],
       },
-      {
-        semestre: '3° Semestre',
-        ramos: [
-          '💼 Normativa contable IFRS',
-          '💰 Normativa tributaria',
-          '💻 TIC para los negocios',
-          '📈 Economía II',
-          '📊 Estadística',
-          '🔍 Control interno y gestión de riesgos'
-        ]
-      },
-      {
-        semestre: '4° Semestre',
-        ramos: [
-          '🔎 Fundamentos de auditoría',
-          '📘 Normativa contable NIC SP',
-          '💼 Impuestos I',
-          '🏷️ Costos para la toma de decisiones I',
-          '📉 Estadística para los negocios',
-          '🇬🇧 Inglés I'
-        ]
-      },
-      {
-        semestre: '5° Semestre',
-        ramos: [
-          '🔢 Bases y aplicación de ciencias de datos',
-          '🧾 Tributación aplicada I',
-          '🧠 Gestión de capital humano',
-          '💸 Costos para la toma de decisiones II',
-          '🇬🇧 Inglés II',
-          '🧪 Taller de integración perfil UV I'
-        ]
-      },
-      {
-        semestre: '6° Semestre',
-        ramos: [
-          '📚 Contabilidad avanzada I',
-          '🧾 Impuestos II',
-          '📈 Gestión comercial',
-          '🏦 Introducción a las finanzas',
-          '🇬🇧 Inglés III',
-          '🔬 Taller de integración perfil UV II',
-          '🧮 Ejecución de proyectos de auditoría'
-        ]
-      },
-      {
-        semestre: '7° Semestre',
-        ramos: [
-          '📘 Contabilidad avanzada II',
-          '💼 Tributación aplicada II',
-          '🔄 Gestión de operaciones',
-          '💻 Auditoría de sistemas',
-          '💰 Finanzas corporativas',
-          '🇬🇧 Inglés IV',
-          '📋 Proyecto de investigación',
-          '🔍 Práctica temprana'
-        ]
-      },
-      {
-        semestre: '8° Semestre',
-        ramos: [
-          '📙 Contabilidad avanzada III',
-          '📜 Gestión tributaria',
-          '📊 Planificación y control de gestión',
-          '🧾 Auditoría de estados financieros',
-          '💸 Gestión financiera',
-          '🔬 Investigación aplicada'
-        ]
-      },
-      {
-        semestre: '9° Semestre',
-        ramos: [
-          '🧩 Electivo 1 profesional',
-          '🧩 Electivo 2 profesional',
-          '🧩 Electivo 3 profesional',
-          '📈 Formulación y evaluación de proyectos de inversión',
-          '🧭 Dirección gerencial',
-          '🧪 Práctica profesional'
-        ]
-      },
-      {
-        semestre: '10° Semestre',
-        ramos: [
-          '🎓 Taller de integración profesional'
-        ]
-      }
+      // Puedes continuar agregando más semestres aquí usando el mismo formato
     ];
 
-    const contenedor = document.getElementById('malla');
+```
+const malla = document.getElementById("malla");
+const estadoNotas = JSON.parse(localStorage.getItem("notas-malla")) || {};
 
-    data.forEach(bloque => {
-      const col = document.createElement('div');
-      col.className = 'semestre';
-      const titulo = document.createElement('h2');
-      titulo.textContent = bloque.semestre;
-      col.appendChild(titulo);
+function actualizarEstado() {
+  localStorage.setItem("notas-malla", JSON.stringify(estadoNotas));
+}
 
-      bloque.ramos.forEach(nombre => {
-        const ramo = document.createElement('div');
-        ramo.className = 'ramo';
-        ramo.innerHTML = `
-          <div><span class="emoji">🌸</span>${nombre}</div>
-          <input type="number" min="1" max="7" step="0.1" placeholder="Nota" />
-          <div class="cuadro-icono">🐾</div>
-        `;
-        ramo.querySelector('input').addEventListener('change', e => {
-          const nota = parseFloat(e.target.value);
-          ramo.classList.remove('aprobado', 'examen', 'reprobado');
-          if (!isNaN(nota)) {
-            if (nota >= 5.0) ramo.classList.add('aprobado');
-            else if (nota >= 4.0) ramo.classList.add('examen');
-            else ramo.classList.add('reprobado');
-          }
-        });
-        col.appendChild(ramo);
-      });
-      contenedor.appendChild(col);
+function actualizarRamos() {
+  document.querySelectorAll(".ramo").forEach((div) => {
+    const nombre = div.dataset.nombre;
+    const nota = parseFloat(estadoNotas[nombre]);
+    div.classList.remove("aprobado", "reprobado", "aprobado-examen");
+    if (!isNaN(nota)) {
+      if (nota < 4.0) div.classList.add("reprobado");
+      else if (nota >= 5.0) div.classList.add("aprobado");
+      else div.classList.add("aprobado-examen");
+    }
+  });
+
+  // Revisión de dependencias
+  const desbloqueados = new Set();
+  for (const semestre of datos) {
+    for (const ramo of semestre.ramos) {
+      const nota = parseFloat(estadoNotas[ramo.nombre]);
+      if (!isNaN(nota) && nota >= 4.0) {
+        desbloqueados.add(ramo.nombre);
+        (ramo.abre || []).forEach((r) => desbloqueados.add(r));
+      }
+    }
+  }
+
+  document.querySelectorAll(".ramo").forEach((div) => {
+    const nombre = div.dataset.nombre;
+    const depende = div.dataset.depende;
+    if (!depende) return;
+    const deps = depende.split(",");
+    const activo = deps.every((d) => desbloqueados.has(d));
+    if (!activo) div.classList.add("locked");
+    else div.classList.remove("locked");
+  });
+}
+
+for (const semestre of datos) {
+  const col = document.createElement("div");
+  col.className = "semestre";
+  const titulo = document.createElement("h2");
+  titulo.textContent = semestre.semestre;
+  col.appendChild(titulo);
+
+  for (const ramo of semestre.ramos) {
+    const div = document.createElement("div");
+    div.className = "ramo";
+    div.dataset.nombre = ramo.nombre;
+    if (ramo.dependeDe) div.dataset.depende = ramo.dependeDe.join(",");
+
+    const label = document.createElement("label");
+    label.textContent = ramo.nombre;
+    const input = document.createElement("input");
+    input.type = "number";
+    input.min = 1;
+    input.max = 7;
+    input.step = 0.1;
+    input.value = estadoNotas[ramo.nombre] || "";
+
+    input.addEventListener("change", () => {
+      estadoNotas[ramo.nombre] = input.value;
+      actualizarEstado();
+      actualizarRamos();
     });
-  </script>
 
+    label.appendChild(input);
+    div.appendChild(label);
+    col.appendChild(div);
+  }
+
+  malla.appendChild(col);
+}
+
+actualizarRamos();
+```
+
+  </script>
 </body>
 </html>
