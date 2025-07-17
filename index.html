@@ -1,190 +1,271 @@
 <!DOCTYPE html>
 
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📘 Malla Auditoría UV 🐱🌸</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <title>📚 Malla Curricular Auditoría UV</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(to right, #fef6ff, #f9fcff);
+      background: #fdf6ff url('https://www.transparenttextures.com/patterns/paper-fibers.png');
       margin: 0;
       padding: 2rem;
       color: #333;
     }
-    h1 {
-      text-align: center;
-      color: #6a0dad;
-      font-size: 2rem;
-    }
-    .semestres {
-      display: flex;
-      gap: 1rem;
-      overflow-x: auto;
-      padding: 1rem;
-    }
-    .semestre {
-      background: #fff;
-      border-radius: 1rem;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      padding: 1rem;
-      min-width: 220px;
-      flex-shrink: 0;
-    }
-    .semestre h2 {
-      text-align: center;
-      color: #6a0dad;
-    }
-    .ramo {
-      margin: 0.5rem 0;
-      padding: 0.5rem;
-      border-radius: 0.5rem;
-      background: #fafafa;
-      transition: background 0.3s, transform 0.2s;
-      position: relative;
-      border: 1px solid #ddd;
-    }
-    .ramo.locked {
-      background: #f3f3f3;
-      opacity: 0.6;
-      pointer-events: none;
-    }
-    .ramo.aprobado {
-      text-decoration: line-through;
-      background: #e0f7e9;
-    }
-    .ramo.aprobado-examen {
-      text-decoration: line-through;
-      background: #fff6d6;
-    }
-    .ramo.reprobado {
-      text-decoration: line-through;
-      background: #ffe6e6;
-    }
-    .ramo:hover {
-      background: #f0eaff;
-      transform: scale(1.01);
-    }
-    input {
-      width: 3rem;
-      margin-left: 0.5rem;
-    }
+
+```
+h1 {
+  text-align: center;
+  color: #6a0dad;
+  font-size: 2rem;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 2rem;
+  padding-bottom: 1rem;
+}
+
+.semester {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  min-width: 250px;
+  padding: 1rem;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.semester h2 {
+  text-align: center;
+  background: linear-gradient(90deg, #fbb1bd, #d6bbfb);
+  border-radius: 10px;
+  padding: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.course {
+  background-color: #e7e6f5;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  border-radius: 10px;
+  transition: 0.3s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  opacity: 1;
+}
+
+.course:hover {
+  background-color: #d1c4e9;
+}
+
+.course.locked {
+  background-color: #ddd;
+  color: #aaa;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.course.taken {
+  text-decoration: line-through;
+}
+
+.course input {
+  width: 45px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  padding: 2px;
+  text-align: center;
+}
+
+.course.approved {
+  background-color: #d0f5c8;
+}
+
+.course.exam {
+  background-color: #fff5b7;
+}
+
+.sticker {
+  position: absolute;
+  top: -15px;
+  right: -10px;
+  font-size: 1.5rem;
+}
+```
+
   </style>
 </head>
+
 <body>
-  <h1>📘 Malla Curricular Auditoría UV 🐱🌸</h1>
-  <div class="semestres" id="malla"></div>
+  <h1>📚 Malla Curricular Auditoría UV 🐱🌸</h1>
+  <div class="container" id="mallaContainer"></div>
+
   <script>
-    const datos = [
-      {
-        semestre: "Primer semestre",
-        ramos: [
-          { nombre: "Introducción a la contabilidad", abre: ["Contabilidad financiera"] },
-          { nombre: "Normativa empresarial I", abre: ["Normativa empresarial II"] },
-          { nombre: "Gestión de organizaciones I", abre: ["Gestión de organizaciones II"] },
-          { nombre: "Lengua materna y autorregulación" },
-          { nombre: "Matemáticas I", abre: ["Matemáticas II", "Economía I"] },
-        ],
-      },
-      {
-        semestre: "Segundo semestre",
-        ramos: [
-          { nombre: "Contabilidad financiera", abre: ["Normativa contable IFRS"], dependeDe: ["Introducción a la contabilidad"] },
-          { nombre: "Normativa empresarial II", abre: ["Normativa tributaria"], dependeDe: ["Normativa empresarial I"] },
-          { nombre: "Gestión de organizaciones II", abre: ["Gestión de capital humano", "Gestión comercial"], dependeDe: ["Gestión de organizaciones I"] },
-          { nombre: "Introducción a la auditoría", abre: ["Control interno y gestión de riesgos"] },
-          { nombre: "Economía I", abre: ["Economía II", "Costos para la toma de decisiones I"], dependeDe: ["Matemáticas I"] },
-          { nombre: "Matemáticas II", abre: ["Estadística"], dependeDe: ["Matemáticas I"] },
-        ],
-      },
-      // Puedes continuar agregando más semestres aquí usando el mismo formato
-    ];
+    const malla = {
+      '1er Semestre': [
+        { nombre: 'Introducción a la contabilidad', abre: ['Contabilidad financiera'] },
+        { nombre: 'Normativa empresarial I', abre: ['Normativa empresarial II'] },
+        { nombre: 'Gestión de organizaciones I', abre: ['Gestión de organizaciones II'] },
+        { nombre: 'Lengua materna y autorregulación' },
+        { nombre: 'Matemáticas I', abre: ['Matemáticas II', 'Economía I'] },
+      ],
+      '2do Semestre': [
+        { nombre: 'Contabilidad financiera', abre: ['Normativa contable IFRS'] },
+        { nombre: 'Normativa empresarial II', abre: ['Normativa tributaria'] },
+        { nombre: 'Gestión de organizaciones II', abre: ['Gestión de capital humano', 'Gestión comercial'] },
+        { nombre: 'Introducción a la auditoría', abre: ['Control interno y gestión de riesgos'] },
+        { nombre: 'Economía I', abre: ['Economía II', 'Costos para la toma de decisiones I'] },
+        { nombre: 'Matemáticas II', abre: ['Estadística'] },
+      ],
+      '3er Semestre': [
+        { nombre: 'Normativa contable IFRS', abre: ['Normativa contable NIC SP', 'Taller de integración perfil UV I', 'Contabilidad avanzada I', 'Proyecto de investigación'] },
+        { nombre: 'Normativa tributaria', abre: ['Impuestos I', 'Taller de integración perfil UV I'] },
+        { nombre: 'TIC para los negocios', abre: ['Taller de integración perfil UV I'] },
+        { nombre: 'Economía II', abre: ['Taller de integración perfil UV I'] },
+        { nombre: 'Estadística', abre: ['Estadística para los negocios', 'Taller de integración perfil UV I'] },
+        { nombre: 'Control interno y gestión de riesgos', abre: ['Fundamentos de auditoría', 'Ejecución de proyectos de auditoría', 'Auditoría de sistemas', 'Proyecto de investigación', 'Práctica temprana'] },
+      ],
+      '4to Semestre': [
+        { nombre: 'Fundamentos de auditoría', abre: ['Taller de integración perfil UV I'] },
+        { nombre: 'Normativa contable NIC SP', abre: ['Práctica temprana'] },
+        { nombre: 'Impuestos I', abre: ['Tributación aplicada I', 'Práctica temprana'] },
+        { nombre: 'Costos para la toma de decisiones I', abre: ['Práctica temprana'] },
+        { nombre: 'Estadística para los negocios', abre: ['Bases y aplicación de ciencias de datos', 'Costos para la toma de decisiones II'] },
+        { nombre: 'Inglés I', abre: ['Inglés II'] },
+      ],
+      '5to Semestre': [
+        { nombre: 'Bases y aplicación de ciencias de datos', abre: ['Ejecución de proyectos de auditoría'] },
+        { nombre: 'Tributación aplicada I', abre: ['Impuestos II'] },
+        { nombre: 'Gestión de capital humano' },
+        { nombre: 'Costos para la toma de decisiones II', abre: ['Introducción a las finanzas', 'Gestión de operaciones'] },
+        { nombre: 'Inglés II', abre: ['Inglés III'] },
+        { nombre: 'Taller de integración perfil UV I', abre: ['Taller de integración perfil UV II'] },
+      ],
+      '6to Semestre': [
+        { nombre: 'Contabilidad avanzada I', abre: ['Contabilidad avanzada II'] },
+        { nombre: 'Impuestos II', abre: ['Tributación aplicada II', 'Proyecto de investigación'] },
+        { nombre: 'Gestión comercial', abre: ['Gestión de operaciones'] },
+        { nombre: 'Introducción a las finanzas', abre: ['Finanzas corporativas', 'Proyecto de investigación', 'Gestión financiera'] },
+        { nombre: 'Inglés III', abre: ['Inglés IV'] },
+        { nombre: 'Taller de integración perfil UV II' },
+        { nombre: 'Ejecución de proyectos de auditoría' },
+      ],
+      '7mo Semestre': [
+        { nombre: 'Contabilidad avanzada II', abre: ['Contabilidad avanzada III', 'Auditoría de estados financieros', 'Electivo 1 profesional', 'Electivo 2 profesional', 'Electivo 3 profesional', 'Dirección gerencial', 'Práctica profesional'] },
+        { nombre: 'Tributación aplicada II', abre: ['Gestión tributaria', 'Electivo 1 profesional', 'Electivo 2 profesional', 'Electivo 3 profesional', 'Dirección gerencial', 'Práctica profesional'] },
+        { nombre: 'Gestión de operaciones', abre: ['Planificación y control de gestión', 'Electivo 1 profesional', 'Electivo 2 profesional', 'Electivo 3 profesional', 'Dirección gerencial'] },
+        { nombre: 'Auditoría de sistemas', abre: ['Electivo 1 profesional', 'Electivo 2 profesional', 'Electivo 3 profesional', 'Dirección gerencial'] },
+        { nombre: 'Finanzas corporativas', abre: ['Electivo 1 profesional', 'Electivo 2 profesional', 'Electivo 3 profesional', 'Formulación y evaluación de proyectos de inversión', 'Dirección gerencial'] },
+        { nombre: 'Inglés IV', abre: ['Electivo 1 profesional', 'Electivo 2 profesional', 'Electivo 3 profesional', 'Dirección gerencial'] },
+        { nombre: 'Proyecto de investigación', abre: ['Investigación aplicada', 'Electivo 1 profesional', 'Electivo 2 profesional', 'Electivo 3 profesional', 'Dirección gerencial'] },
+        { nombre: 'Práctica temprana', abre: ['Electivo 1 profesional', 'Electivo 2 profesional', 'Electivo 3 profesional', 'Dirección gerencial', 'Práctica profesional'] },
+      ],
+      '8vo Semestre': [
+        { nombre: 'Contabilidad avanzada III', abre: ['Taller de integración profesional'] },
+        { nombre: 'Gestión tributaria', abre: ['Taller de integración profesional'] },
+        { nombre: 'Planificación y control de gestión', abre: ['Taller de integración profesional'] },
+        { nombre: 'Auditoría de estados financieros', abre: ['Práctica profesional', 'Taller de integración profesional'] },
+        { nombre: 'Gestión financiera', abre: ['Taller de integración profesional'] },
+        { nombre: 'Investigación aplicada', abre: ['Taller de integración profesional'] },
+      ],
+      '9no Semestre': [
+        { nombre: 'Electivo 1 profesional' },
+        { nombre: 'Electivo 2 profesional' },
+        { nombre: 'Electivo 3 profesional' },
+        { nombre: 'Formulación y evaluación de proyectos de inversión' },
+        { nombre: 'Dirección gerencial' },
+        { nombre: 'Práctica profesional' },
+      ],
+      '10mo Semestre': [
+        { nombre: 'Taller de integración profesional' },
+      ],
+    };
 
-```
-const malla = document.getElementById("malla");
-const estadoNotas = JSON.parse(localStorage.getItem("notas-malla")) || {};
+    const notas = JSON.parse(localStorage.getItem('notas') || '{}');
 
-function actualizarEstado() {
-  localStorage.setItem("notas-malla", JSON.stringify(estadoNotas));
-}
+    function crearCurso(nombre, abre = []) {
+      const div = document.createElement('div');
+      div.className = 'course';
+      const label = document.createElement('span');
+      label.textContent = nombre;
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.min = 1;
+      input.max = 7;
+      input.step = 0.1;
+      input.value = notas[nombre] || '';
+      div.appendChild(label);
+      div.appendChild(input);
 
-function actualizarRamos() {
-  document.querySelectorAll(".ramo").forEach((div) => {
-    const nombre = div.dataset.nombre;
-    const nota = parseFloat(estadoNotas[nombre]);
-    div.classList.remove("aprobado", "reprobado", "aprobado-examen");
-    if (!isNaN(nota)) {
-      if (nota < 4.0) div.classList.add("reprobado");
-      else if (nota >= 5.0) div.classList.add("aprobado");
-      else div.classList.add("aprobado-examen");
+      if (abre.length > 0) div.dataset.abre = JSON.stringify(abre);
+      input.addEventListener('input', () => {
+        const val = parseFloat(input.value);
+        if (!isNaN(val)) notas[nombre] = val;
+        else delete notas[nombre];
+        localStorage.setItem('notas', JSON.stringify(notas));
+        actualizarUI();
+      });
+      return div;
     }
-  });
 
-  // Revisión de dependencias
-  const desbloqueados = new Set();
-  for (const semestre of datos) {
-    for (const ramo of semestre.ramos) {
-      const nota = parseFloat(estadoNotas[ramo.nombre]);
-      if (!isNaN(nota) && nota >= 4.0) {
-        desbloqueados.add(ramo.nombre);
-        (ramo.abre || []).forEach((r) => desbloqueados.add(r));
-      }
+    function actualizarUI() {
+      const cursos = document.querySelectorAll('.course');
+      const aprobados = {};
+
+      cursos.forEach(c => {
+        const nombre = c.querySelector('span').textContent;
+        const nota = parseFloat(c.querySelector('input').value);
+        c.className = 'course';
+        if (!isNaN(nota)) {
+          if (nota >= 5) {
+            c.classList.add('approved', 'taken');
+            aprobados[nombre] = true;
+          } else if (nota >= 4) {
+            c.classList.add('exam', 'taken');
+            aprobados[nombre] = true;
+          } else {
+            aprobados[nombre] = false;
+          }
+        }
+      });
+
+      cursos.forEach(c => {
+        const nombre = c.querySelector('span').textContent;
+        const requisitos = Object.entries(malla)
+          .flatMap(([_, cs]) => cs)
+          .filter(({ abre }) => (abre || []).includes(nombre))
+          .map(c => c.nombre);
+
+        if (requisitos.some(req => !(req in aprobados) || aprobados[req] === false)) {
+          c.classList.add('locked');
+        }
+      });
     }
-  }
 
-  document.querySelectorAll(".ramo").forEach((div) => {
-    const nombre = div.dataset.nombre;
-    const depende = div.dataset.depende;
-    if (!depende) return;
-    const deps = depende.split(",");
-    const activo = deps.every((d) => desbloqueados.has(d));
-    if (!activo) div.classList.add("locked");
-    else div.classList.remove("locked");
-  });
-}
+    const container = document.getElementById('mallaContainer');
+    for (const [semestre, cursos] of Object.entries(malla)) {
+      const col = document.createElement('div');
+      col.className = 'semester';
+      const h2 = document.createElement('h2');
+      h2.textContent = semestre;
+      col.appendChild(h2);
+      cursos.forEach(curso => {
+        col.appendChild(crearCurso(curso.nombre, curso.abre));
+      });
+      container.appendChild(col);
+    }
 
-for (const semestre of datos) {
-  const col = document.createElement("div");
-  col.className = "semestre";
-  const titulo = document.createElement("h2");
-  titulo.textContent = semestre.semestre;
-  col.appendChild(titulo);
-
-  for (const ramo of semestre.ramos) {
-    const div = document.createElement("div");
-    div.className = "ramo";
-    div.dataset.nombre = ramo.nombre;
-    if (ramo.dependeDe) div.dataset.depende = ramo.dependeDe.join(",");
-
-    const label = document.createElement("label");
-    label.textContent = ramo.nombre;
-    const input = document.createElement("input");
-    input.type = "number";
-    input.min = 1;
-    input.max = 7;
-    input.step = 0.1;
-    input.value = estadoNotas[ramo.nombre] || "";
-
-    input.addEventListener("change", () => {
-      estadoNotas[ramo.nombre] = input.value;
-      actualizarEstado();
-      actualizarRamos();
-    });
-
-    label.appendChild(input);
-    div.appendChild(label);
-    col.appendChild(div);
-  }
-
-  malla.appendChild(col);
-}
-
-actualizarRamos();
-```
-
+    actualizarUI();
   </script>
+
 </body>
+
 </html>
-.
