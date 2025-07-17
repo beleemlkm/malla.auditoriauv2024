@@ -100,3 +100,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
   updateDependencias(); // Inicial
 });
+function calcularAvance() {
+  const total = ramos.length;
+  let aprobados = 0;
+
+  ramos.forEach((ramo) => {
+    if (ramo.classList.contains("aprobado") || ramo.classList.contains("examen")) {
+      aprobados++;
+    }
+  });
+
+  const porcentaje = Math.round((aprobados / total) * 100);
+  const texto = `${aprobados} de ${total} ramos avanzados (${porcentaje}%)`;
+
+  const barra = document.getElementById("progreso-barra");
+  const textoEl = document.getElementById("progreso-texto");
+  if (barra && textoEl) {
+    barra.value = porcentaje;
+    textoEl.textContent = texto;
+  }
+}
+
+// Llamar después de cada actualización
+ramos.forEach((r) => {
+  const input = r.querySelector("input[type='number']");
+  if (input) {
+    input.addEventListener("input", calcularAvance);
+  }
+});
+calcularAvance();
