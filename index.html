@@ -172,18 +172,18 @@
     const NOTA_APRUEBA = 4.0;
     const UMBRAL_EXTRA = 3.5;
 
-    const REP_SUFFIX = "__REP"; // clave independiente para el ramo repetido
+    const REP_SUFFIX = "__REP"; // clave independiente para el repetido
 
     const ramos = [
       { nombre: "Introducción a la contabilidad", semestre: 1, abre: ["Contabilidad financiera"] },
       { nombre: "Normativa empresarial I", semestre: 1, abre: ["Normativa empresarial II"] },
-      { nombre: "Gestión de organizaciones I", semestre: 1, abre: ["Gestión de organizations II"] },
+      { nombre: "Gestión de organizaciones I", semestre: 1, abre: ["Gestión de organizaciones II"] },
       { nombre: "Lengua materna y autorregulación", semestre: 1 },
       { nombre: "Matemáticas I", semestre: 1, abre: ["Matemáticas II", "Economía I"] },
 
       { nombre: "Contabilidad financiera", semestre: 2, requiere: ["Introducción a la contabilidad"], abre: ["Normativa contable IFRS"] },
       { nombre: "Normativa empresarial II", semestre: 2, requiere: ["Normativa empresarial I"], abre: ["Normativa tributaria"] },
-      { nombre: "Gestión de organizations II", semestre: 2, requiere: ["Gestión de organizaciones I"], abre: ["Gestión de capital humano", "Gestión comercial"] },
+      { nombre: "Gestión de organizaciones II", semestre: 2, requiere: ["Gestión de organizaciones I"], abre: ["Gestión de capital humano", "Gestión comercial"] },
       { nombre: "Introducción a la auditoría", semestre: 2, abre: ["Control interno y gestión de riesgos"] },
       { nombre: "Economía I", semestre: 2, requiere: ["Matemáticas I"], abre: ["Economía II", "Costos para la toma de decisiones I"] },
       { nombre: "Matemáticas II", semestre: 2, requiere: ["Matemáticas I"], abre: ["Estadística"] },
@@ -204,14 +204,14 @@
 
       { nombre: "Bases y aplicación de ciencias de datos", semestre: 5, requiere: ["Estadística para los negocios"], abre: ["Ejecución de proyectos de auditoría"] },
       { nombre: "Tributación aplicada I", semestre: 5, requiere: ["Impuestos I"], abre: ["Impuestos II"] },
-      { nombre: "Gestión de capital humano", semestre: 5, requiere: ["Gestión de organizations II"] },
+      { nombre: "Gestión de capital humano", semestre: 5, requiere: ["Gestión de organizaciones II"] },
       { nombre: "Costos para la toma de decisiones II", semestre: 5, requiere: ["Estadística para los negocios"], abre: ["Introducción a las finanzas", "Gestión de operaciones"] },
       { nombre: "Inglés II", semestre: 5, requiere: ["Inglés I"], abre: ["Inglés III"] },
       { nombre: "Taller de integración perfil UV I", semestre: 5, requiere: ["Normativa contable IFRS", "Normativa tributaria", "TIC para los negocios", "Economía II", "Estadística", "Fundamentos de auditoría"], abre: ["Taller de integración perfil UV II"] },
 
       { nombre: "Contabilidad avanzada I", semestre: 6, requiere: ["Normativa contable IFRS"], abre: ["Contabilidad avanzada II"] },
       { nombre: "Impuestos II", semestre: 6, requiere: ["Tributación aplicada I"], abre: ["Tributación aplicada II", "Proyecto de investigación"] },
-      { nombre: "Gestión comercial", semestre: 6, requiere: ["Gestión de capital humano"], abre: ["Gestión de operaciones"] },
+      { nombre: "Gestión comercial", semestre: 6, requiere: ["Gestión de organizaciones II"], abre: ["Gestión de operaciones"] },
       { nombre: "Introducción a las finanzas", semestre: 6, requiere: ["Costos para la toma de decisiones II"], abre: ["Finanzas corporativas", "Proyecto de investigación", "Gestión financiera"] },
       { nombre: "Inglés III", semestre: 6, requiere: ["Inglés II"], abre: ["Inglés IV"] },
       { nombre: "Taller de integración perfil UV II", semestre: 6, requiere: ["Taller de integración perfil UV I"] },
@@ -246,8 +246,12 @@
     const contenedor = document.getElementById("contenedor");
     let estados = JSON.parse(localStorage.getItem("estadoRamos") || '{}');
 
-    function actualizarLocalStorage() {
+    // NUEVO: ubicación mínima “pegada” (para que no se devuelva hacia atrás)
+    let ubicMin = JSON.parse(localStorage.getItem("ubicMinRamos") || '{}');
+
+    function guardar() {
       localStorage.setItem("estadoRamos", JSON.stringify(estados));
+      localStorage.setItem("ubicMinRamos", JSON.stringify(ubicMin));
     }
 
     function nfloat(x) {
@@ -263,22 +267,23 @@
     function keyBase(nombre) { return nombre; }
     function keyRep(nombre) { return nombre + REP_SUFFIX; }
 
-    // Registro (compat con formato antiguo)
     function getRegistro(key) {
       const v = estados[key];
       if (v == null) return { nota: "", ord: "", ext: "" };
-
-      if (typeof v === "object") {
-        return { nota: v.nota ?? "", ord: v.ord ?? v.examen ?? "", ext: v.ext ?? "" };
-      }
+      if (typeof v === "object") return { nota: v.nota ?? "", ord: v.ord ?? v.examen ?? "", ext: v.ext ?? "" };
       return { nota: String(v), ord: "", ext: "" };
     }
 
     function setRegistro(key, patch) {
       const reg = getRegistro(key);
       estados[key] = { ...reg, ...patch };
-      actualizarLocalStorage();
+      guardar();
       render();
+    }
+
+    function tieneDatos(key) {
+      const r = getRegistro(key);
+      return (r.nota !== "" || r.ord !== "" || r.ext !== "");
     }
 
     function finalOrdinaria(reg) {
@@ -295,21 +300,18 @@
       return redondear1(PESO_PRESENTACION * np + PESO_EXAMEN * ne);
     }
 
-    // Nota definitiva por "intento" (base o repetido)
     function notaDefinitivaByReg(reg) {
       const np = nfloat(reg.nota);
       if (!Number.isFinite(np)) return NaN;
 
       if (np >= NOTA_EXIMIDO) return np;
 
-      // con cualquier presentación <5, puede ordinario
       const fo = finalOrdinaria(reg);
       if (!Number.isFinite(fo)) return NaN;
 
-      if (fo < UMBRAL_EXTRA) return fo;               // reprobado automático sin extraordinario
-      if (fo >= NOTA_APRUEBA) return fo;              // aprobado con ordinario
+      if (fo < UMBRAL_EXTRA) return fo;
+      if (fo >= NOTA_APRUEBA) return fo;
 
-      // 3.5 a 3.9 => depende de extraordinario
       const fe = finalExtra(reg);
       if (!Number.isFinite(fe)) return NaN;
       return fe;
@@ -320,17 +322,9 @@
       return Number.isFinite(fo) && fo >= UMBRAL_EXTRA;
     }
 
-    // Nota definitiva del ramo considerando repetición independiente:
-    // - Si el repetido está aprobado definitivo => ese manda (porque es el último)
-    // - Si no, si el base está aprobado definitivo => ese manda
-    // - Si no, si alguno tiene definitivo <4 => reprobado (sigue sin aprobar)
-    // - Si no hay definitivo aún => NaN
     function notaDefinitivaRamo(nombre) {
-      const regB = getRegistro(keyBase(nombre));
-      const regR = getRegistro(keyRep(nombre));
-
-      const ndB = notaDefinitivaByReg(regB);
-      const ndR = notaDefinitivaByReg(regR);
+      const ndR = notaDefinitivaByReg(getRegistro(keyRep(nombre)));
+      const ndB = notaDefinitivaByReg(getRegistro(keyBase(nombre)));
 
       if (Number.isFinite(ndR) && ndR >= NOTA_APRUEBA) return ndR;
       if (Number.isFinite(ndB) && ndB >= NOTA_APRUEBA) return ndB;
@@ -351,12 +345,12 @@
       return Number.isFinite(ndR) && ndR >= NOTA_APRUEBA;
     }
 
-    // Necesita mostrar el repetido SOLO cuando el base reprobó definitivo y el repetido aún no aprueba
+    // Repite si base reprobó definitivo y el repetido aún no aprueba.
+    // PERO: aunque ya apruebe, si tiene datos, lo seguimos mostrando como historial.
     function necesitaRepetir(nombre) {
       return baseReprobadoDefinitivo(nombre) && !repAprobadoDefinitivo(nombre);
     }
 
-    // Requisitos se cumplen si el ramo requisito tiene definitiva >=4 (considerando repetido)
     function cumpleRequisitos(ramo) {
       if (!ramo.requiere || ramo.requiere.length === 0) return true;
       return ramo.requiere.every(req => {
@@ -365,7 +359,7 @@
       });
     }
 
-    // Mover dependientes si el prerequisito NO está aprobado (definitiva <4)
+    // mueve dependientes SOLO si el prerequisito tiene definitiva calculada y es <4
     function calcularShiftDependientes() {
       const dependientes = {};
       ramos.forEach(r => {
@@ -386,7 +380,6 @@
       }
 
       ramos.forEach(r => {
-        // Si el ramo aún NO está aprobado definitivamente, sus dependientes se posponen
         const nd = notaDefinitivaRamo(r.nombre);
         if (Number.isFinite(nd) && nd < NOTA_APRUEBA) {
           propagar(r.nombre, 1);
@@ -396,22 +389,21 @@
       return shift;
     }
 
-    function semestreEfectivo(ramo, shiftMap) {
+    function semestreEfectivoBase(ramo, shiftMap) {
       return (ramo.semestre || 1) + (shiftMap[ramo.nombre] || 0);
     }
 
-    function maxSemestreRender(shiftMap) {
-      let m = 10;
-      ramos.forEach(r => {
-        const base = semestreEfectivo(r, shiftMap);
-        m = Math.max(m, base);
-        // si necesita repetir, aparece además en base+1
-        if (necesitaRepetir(r.nombre)) m = Math.max(m, base + 1);
-      });
-      return m;
+    // Semestre “pegado”: nunca baja, solo sube
+    function semestreVisible(key, semCalculado) {
+      const prev = ubicMin[key] || 0;
+      const sem = Math.max(prev, semCalculado);
+      if (sem > prev) {
+        ubicMin[key] = sem;
+        guardar();
+      }
+      return sem;
     }
 
-    // Estado texto y clases por "instancia" (base o repetido)
     function textoEstadoInstancia(reg) {
       const np = nfloat(reg.nota);
       if (!Number.isFinite(np)) return "";
@@ -432,16 +424,15 @@
     function claseInstancia(reg) {
       const np = nfloat(reg.nota);
       if (!Number.isFinite(np)) return "";
-
       if (np >= NOTA_EXIMIDO) return "eximido";
 
       const nd = notaDefinitivaByReg(reg);
       if (Number.isFinite(nd) && nd < NOTA_APRUEBA) return "reprobado";
 
-      return "examen"; // con cualquier presentación <5 va a exámenes
+      return "examen";
     }
 
-    function renderInstancia({ ramo, semestreActual, esRepetido, habilitado, key }) {
+    function renderInstancia({ ramo, esRepetido, habilitado, key }) {
       const div = document.createElement("div");
       div.classList.add("ramo");
 
@@ -468,7 +459,6 @@
         div.appendChild(b);
       }
 
-      // Presentación
       const inputP = document.createElement("input");
       inputP.type = "number";
       inputP.min = "1";
@@ -489,7 +479,6 @@
 
       div.appendChild(inputP);
 
-      // Exámenes si hay presentación y no es eximido
       const tienePres = Number.isFinite(nfloat(reg.nota));
       const esEximido = tienePres && nfloat(reg.nota) >= NOTA_EXIMIDO;
 
@@ -536,7 +525,6 @@
           setRegistro(key, { ext: inputExt.value });
         });
 
-        // Final (por instancia)
         const miniF = document.createElement("span");
         miniF.classList.add("mini");
         miniF.textContent = "Final:";
@@ -546,7 +534,6 @@
         const nd2 = notaDefinitivaByReg(reg);
         finalVal.textContent = Number.isFinite(nd2) ? String(nd2).replace(".", ",") : "—";
 
-        // bloquear ext si no cumple >=3.5
         if (!puedeRendirExtra(reg)) inputExt.disabled = true;
 
         grupo.appendChild(miniO);
@@ -563,7 +550,6 @@
       estadoSpan.classList.add("estado");
       estadoSpan.textContent = textoEstadoInstancia(reg);
 
-      // forzar rojo si definitiva reprobada
       if (Number.isFinite(nd) && nd < NOTA_APRUEBA) {
         div.classList.remove("eximido");
         div.classList.remove("examen");
@@ -578,9 +564,24 @@
       contenedor.innerHTML = "";
 
       const shiftMap = calcularShiftDependientes();
-      const maxSem = maxSemestreRender(shiftMap);
 
       const stickers = ["🐱","🎀","📖","🐰","🌷","🐝","🪄","🌻","🦦","🍀","✨","🌙","🧸","🍓","🧁"];
+
+      // calculamos máximo semestre considerando “pegado” + rep
+      let maxSem = 10;
+      ramos.forEach(ramo => {
+        const semCalcBase = semestreEfectivoBase(ramo, shiftMap);
+        const semBase = semestreVisible(keyBase(ramo.nombre), semCalcBase);
+        maxSem = Math.max(maxSem, semBase);
+
+        // el repetido va en semBase+1 (y también “pegado” para que no se corra atrás)
+        const semCalcRep = semBase + 1;
+        const mostrarRep = necesitaRepetir(ramo.nombre) || tieneDatos(keyRep(ramo.nombre));
+        if (mostrarRep) {
+          const semRep = semestreVisible(keyRep(ramo.nombre), semCalcRep);
+          maxSem = Math.max(maxSem, semRep);
+        }
+      });
 
       for (let s = 1; s <= maxSem; s++) {
         const semestre = document.createElement("div");
@@ -596,31 +597,33 @@
         semestre.appendChild(titulo);
 
         ramos.forEach(ramo => {
-          const semBaseMovido = semestreEfectivo(ramo, shiftMap);
+          const semCalcBase = semestreEfectivoBase(ramo, shiftMap);
+          const semBase = semestreVisible(keyBase(ramo.nombre), semCalcBase);
 
-          // 1) instancia BASE se muestra cuando coincide con su semestre movido
-          if (semBaseMovido === s) {
+          if (semBase === s) {
             const habilitado = cumpleRequisitos(ramo);
             semestre.appendChild(renderInstancia({
               ramo,
-              semestreActual: s,
               esRepetido: false,
               habilitado,
               key: keyBase(ramo.nombre)
             }));
           }
 
-          // 2) instancia REPETIDO se muestra SOLO si el base reprobó definitivo y aún no aprueba repetido
-          if (necesitaRepetir(ramo.nombre) && (semBaseMovido + 1) === s) {
-            // El repetido se habilita igual que el ramo (requisitos), pero normalmente ya los tenía cumplidos cuando lo cursó
-            const habilitado = true; // para no bloquearte el recursado por reglas viejas
-            semestre.appendChild(renderInstancia({
-              ramo,
-              semestreActual: s,
-              esRepetido: true,
-              habilitado,
-              key: keyRep(ramo.nombre)
-            }));
+          const mostrarRep = necesitaRepetir(ramo.nombre) || tieneDatos(keyRep(ramo.nombre));
+          if (mostrarRep) {
+            const semCalcRep = semBase + 1;
+            const semRep = semestreVisible(keyRep(ramo.nombre), semCalcRep);
+
+            if (semRep === s) {
+              // recursado: no lo bloqueamos por requisitos antiguos
+              semestre.appendChild(renderInstancia({
+                ramo,
+                esRepetido: true,
+                habilitado: true,
+                key: keyRep(ramo.nombre)
+              }));
+            }
           }
         });
 
