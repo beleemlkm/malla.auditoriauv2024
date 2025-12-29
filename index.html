@@ -100,7 +100,6 @@
       color: #aaa;
       border-color: #ddd;
     }
-
     .ramo:not(.bloqueado):hover {
       background-color: #f6e7ff;
       box-shadow: 0 6px 12px rgba(91, 46, 125, 0.3);
@@ -171,18 +170,20 @@
     const PESO_EXAMEN = 0.30;
     const NOTA_EXIMIDO = 5.0;
     const NOTA_APRUEBA = 4.0;
-    const UMBRAL_EXTRA = 3.5; // si la ordinaria (0.7P + 0.3Ord) >= 3.5 => puede dar extraordinario
+    const UMBRAL_EXTRA = 3.5;
+
+    const REP_SUFFIX = "__REP"; // clave independiente para el ramo repetido
 
     const ramos = [
       { nombre: "Introducción a la contabilidad", semestre: 1, abre: ["Contabilidad financiera"] },
       { nombre: "Normativa empresarial I", semestre: 1, abre: ["Normativa empresarial II"] },
-      { nombre: "Gestión de organizaciones I", semestre: 1, abre: ["Gestión de organizaciones II"] },
+      { nombre: "Gestión de organizaciones I", semestre: 1, abre: ["Gestión de organizations II"] },
       { nombre: "Lengua materna y autorregulación", semestre: 1 },
       { nombre: "Matemáticas I", semestre: 1, abre: ["Matemáticas II", "Economía I"] },
 
       { nombre: "Contabilidad financiera", semestre: 2, requiere: ["Introducción a la contabilidad"], abre: ["Normativa contable IFRS"] },
       { nombre: "Normativa empresarial II", semestre: 2, requiere: ["Normativa empresarial I"], abre: ["Normativa tributaria"] },
-      { nombre: "Gestión de organizaciones II", semestre: 2, requiere: ["Gestión de organizaciones I"], abre: ["Gestión de capital humano", "Gestión comercial"] },
+      { nombre: "Gestión de organizations II", semestre: 2, requiere: ["Gestión de organizaciones I"], abre: ["Gestión de capital humano", "Gestión comercial"] },
       { nombre: "Introducción a la auditoría", semestre: 2, abre: ["Control interno y gestión de riesgos"] },
       { nombre: "Economía I", semestre: 2, requiere: ["Matemáticas I"], abre: ["Economía II", "Costos para la toma de decisiones I"] },
       { nombre: "Matemáticas II", semestre: 2, requiere: ["Matemáticas I"], abre: ["Estadística"] },
@@ -210,7 +211,7 @@
 
       { nombre: "Contabilidad avanzada I", semestre: 6, requiere: ["Normativa contable IFRS"], abre: ["Contabilidad avanzada II"] },
       { nombre: "Impuestos II", semestre: 6, requiere: ["Tributación aplicada I"], abre: ["Tributación aplicada II", "Proyecto de investigación"] },
-      { nombre: "Gestión comercial", semestre: 6, requiere: ["Gestión de organizaciones II"], abre: ["Gestión de operaciones"] },
+      { nombre: "Gestión comercial", semestre: 6, requiere: ["Gestión de capital humano"], abre: ["Gestión de operaciones"] },
       { nombre: "Introducción a las finanzas", semestre: 6, requiere: ["Costos para la toma de decisiones II"], abre: ["Finanzas corporativas", "Proyecto de investigación", "Gestión financiera"] },
       { nombre: "Inglés III", semestre: 6, requiere: ["Inglés II"], abre: ["Inglés IV"] },
       { nombre: "Taller de integración perfil UV II", semestre: 6, requiere: ["Taller de integración perfil UV I"] },
@@ -255,36 +256,31 @@
       return Number.isFinite(n) ? n : NaN;
     }
 
-    // redondeo a 1 decimal (3,46 -> 3,5)
     function redondear1(n) {
       return Math.round((n + Number.EPSILON) * 10) / 10;
     }
 
-    // ====== REGISTRO (localStorage) ======
-    // formato nuevo: { nota:"", ord:"", ext:"" }
-    function getRegistro(nombre) {
-      const v = estados[nombre];
+    function keyBase(nombre) { return nombre; }
+    function keyRep(nombre) { return nombre + REP_SUFFIX; }
+
+    // Registro (compat con formato antiguo)
+    function getRegistro(key) {
+      const v = estados[key];
       if (v == null) return { nota: "", ord: "", ext: "" };
 
       if (typeof v === "object") {
-        return {
-          nota: v.nota ?? "",
-          ord: v.ord ?? v.examen ?? "",
-          ext: v.ext ?? ""
-        };
+        return { nota: v.nota ?? "", ord: v.ord ?? v.examen ?? "", ext: v.ext ?? "" };
       }
-
       return { nota: String(v), ord: "", ext: "" };
     }
 
-    function setRegistro(nombre, patch) {
-      const reg = getRegistro(nombre);
-      estados[nombre] = { ...reg, ...patch };
+    function setRegistro(key, patch) {
+      const reg = getRegistro(key);
+      estados[key] = { ...reg, ...patch };
       actualizarLocalStorage();
       render();
     }
 
-    // ====== CÁLCULOS ======
     function finalOrdinaria(reg) {
       const np = nfloat(reg.nota);
       const no = nfloat(reg.ord);
@@ -299,27 +295,21 @@
       return redondear1(PESO_PRESENTACION * np + PESO_EXAMEN * ne);
     }
 
-    // Nota definitiva:
-    // - si presentación >= 5 => eximido (definitiva = presentación)
-    // - si presentación < 5 => requiere ordinario
-    //    - si ordinaria < 3.5 => definitiva = ordinaria (reprobado automático)
-    //    - si ordinaria >= 3.5:
-    //         - si ordinaria >= 4 => definitiva = ordinaria (aprobado)
-    //         - si 3.5 <= ordinaria < 4 => requiere extraordinario para definitiva
-    function notaDefinitiva(nombre) {
-      const reg = getRegistro(nombre);
+    // Nota definitiva por "intento" (base o repetido)
+    function notaDefinitivaByReg(reg) {
       const np = nfloat(reg.nota);
       if (!Number.isFinite(np)) return NaN;
 
       if (np >= NOTA_EXIMIDO) return np;
 
+      // con cualquier presentación <5, puede ordinario
       const fo = finalOrdinaria(reg);
       if (!Number.isFinite(fo)) return NaN;
 
-      if (fo < UMBRAL_EXTRA) return fo; // reprobado automático sin ext
-      if (fo >= NOTA_APRUEBA) return fo; // aprobado con ordinario
+      if (fo < UMBRAL_EXTRA) return fo;               // reprobado automático sin extraordinario
+      if (fo >= NOTA_APRUEBA) return fo;              // aprobado con ordinario
 
-      // fo entre 3.5 y 3.9 => depende de extraordinario
+      // 3.5 a 3.9 => depende de extraordinario
       const fe = finalExtra(reg);
       if (!Number.isFinite(fe)) return NaN;
       return fe;
@@ -330,74 +320,52 @@
       return Number.isFinite(fo) && fo >= UMBRAL_EXTRA;
     }
 
-    function textoEstado(reg) {
-      const np = nfloat(reg.nota);
-      if (!Number.isFinite(np)) return "";
+    // Nota definitiva del ramo considerando repetición independiente:
+    // - Si el repetido está aprobado definitivo => ese manda (porque es el último)
+    // - Si no, si el base está aprobado definitivo => ese manda
+    // - Si no, si alguno tiene definitivo <4 => reprobado (sigue sin aprobar)
+    // - Si no hay definitivo aún => NaN
+    function notaDefinitivaRamo(nombre) {
+      const regB = getRegistro(keyBase(nombre));
+      const regR = getRegistro(keyRep(nombre));
 
-      if (np >= NOTA_EXIMIDO) return "Eximido";
+      const ndB = notaDefinitivaByReg(regB);
+      const ndR = notaDefinitivaByReg(regR);
 
-      // < 5: siempre puede ordinario
-      const fo = finalOrdinaria(reg);
-      if (!Number.isFinite(fo)) return "Examen Ord.";
+      if (Number.isFinite(ndR) && ndR >= NOTA_APRUEBA) return ndR;
+      if (Number.isFinite(ndB) && ndB >= NOTA_APRUEBA) return ndB;
 
-      if (fo < UMBRAL_EXTRA) return `Reprobado (<${UMBRAL_EXTRA})`;
+      if (Number.isFinite(ndR) && ndR < NOTA_APRUEBA) return ndR;
+      if (Number.isFinite(ndB) && ndB < NOTA_APRUEBA) return ndB;
 
-      // fo >= 3.5
-      if (fo >= NOTA_APRUEBA) return "Aprobado Ord.";
-
-      // 3.5 a 3.9
-      const fe = finalExtra(reg);
-      if (!Number.isFinite(fe)) return "Examen Ext.";
-      if (fe >= NOTA_APRUEBA) return "Aprobado Ext.";
-      return "Reprobado Ext.";
+      return NaN;
     }
 
-    function evaluarClase(reg) {
-      const np = nfloat(reg.nota);
-      if (!Number.isFinite(np)) return "";
-
-      if (np >= NOTA_EXIMIDO) return "eximido";
-
-      // Si hay definitiva y es <4 => reprobado
-      const nd = notaDefinitivaByReg(reg);
-      if (Number.isFinite(nd) && nd < NOTA_APRUEBA) return "reprobado";
-
-      // si tiene nota y <5 => examen (aunque sea 3.8)
-      return "examen";
+    function baseReprobadoDefinitivo(nombre) {
+      const ndB = notaDefinitivaByReg(getRegistro(keyBase(nombre)));
+      return Number.isFinite(ndB) && ndB < NOTA_APRUEBA;
     }
 
-    // helper: notaDefinitiva pero usando reg directo (para evitar doble lookup)
-    function notaDefinitivaByReg(reg) {
-      const np = nfloat(reg.nota);
-      if (!Number.isFinite(np)) return NaN;
-      if (np >= NOTA_EXIMIDO) return np;
-
-      const fo = finalOrdinaria(reg);
-      if (!Number.isFinite(fo)) return NaN;
-
-      if (fo < UMBRAL_EXTRA) return fo;
-      if (fo >= NOTA_APRUEBA) return fo;
-
-      const fe = finalExtra(reg);
-      if (!Number.isFinite(fe)) return NaN;
-      return fe;
+    function repAprobadoDefinitivo(nombre) {
+      const ndR = notaDefinitivaByReg(getRegistro(keyRep(nombre)));
+      return Number.isFinite(ndR) && ndR >= NOTA_APRUEBA;
     }
 
-    function ramoReprobadoDefinitivo(nombre) {
-      const nd = notaDefinitiva(nombre);
-      return Number.isFinite(nd) && nd < NOTA_APRUEBA;
+    // Necesita mostrar el repetido SOLO cuando el base reprobó definitivo y el repetido aún no aprueba
+    function necesitaRepetir(nombre) {
+      return baseReprobadoDefinitivo(nombre) && !repAprobadoDefinitivo(nombre);
     }
 
-    // ====== REQUISITOS ======
+    // Requisitos se cumplen si el ramo requisito tiene definitiva >=4 (considerando repetido)
     function cumpleRequisitos(ramo) {
       if (!ramo.requiere || ramo.requiere.length === 0) return true;
       return ramo.requiere.every(req => {
-        const nd = notaDefinitiva(req);
+        const nd = notaDefinitivaRamo(req);
         return Number.isFinite(nd) && nd >= NOTA_APRUEBA;
       });
     }
 
-    // ====== CADENA: mover dependientes si el prerequisito reprobó definitivo ======
+    // Mover dependientes si el prerequisito NO está aprobado (definitiva <4)
     function calcularShiftDependientes() {
       const dependientes = {};
       ramos.forEach(r => {
@@ -418,8 +386,9 @@
       }
 
       ramos.forEach(r => {
-        if (ramoReprobadoDefinitivo(r.nombre)) {
-          // OJO: NO movemos el ramo reprobado, movemos los dependientes
+        // Si el ramo aún NO está aprobado definitivamente, sus dependientes se posponen
+        const nd = notaDefinitivaRamo(r.nombre);
+        if (Number.isFinite(nd) && nd < NOTA_APRUEBA) {
           propagar(r.nombre, 1);
         }
       });
@@ -427,49 +396,189 @@
       return shift;
     }
 
-    // ====== REPETICIÓN: ramo reprobado aparece también en semestre+1 ======
-    function calcularRepites() {
-      const repite = {};
-      ramos.forEach(r => repite[r.nombre] = false);
-      ramos.forEach(r => {
-        if (ramoReprobadoDefinitivo(r.nombre)) repite[r.nombre] = true;
-      });
-      return repite;
-    }
-
     function semestreEfectivo(ramo, shiftMap) {
       return (ramo.semestre || 1) + (shiftMap[ramo.nombre] || 0);
     }
 
-    // Render helper: decide si un ramo debe mostrarse en semestre s
-    function seMuestraEnSemestre(ramo, s, shiftMap, repiteMap) {
-      const base = semestreEfectivo(ramo, shiftMap);
-      if (base === s) return true;
-
-      // si reprobó definitivo, además se muestra en el semestre siguiente (del base, no del original)
-      // Nota: el ramo en sí NO se mueve; base ya incluye shift (que para el ramo reprobado será 0).
-      if (repiteMap[ramo.nombre] && (base + 1) === s) return true;
-
-      return false;
-    }
-
-    function maxSemestreRender(shiftMap, repiteMap) {
+    function maxSemestreRender(shiftMap) {
       let m = 10;
       ramos.forEach(r => {
         const base = semestreEfectivo(r, shiftMap);
         m = Math.max(m, base);
-        if (repiteMap[r.nombre]) m = Math.max(m, base + 1);
+        // si necesita repetir, aparece además en base+1
+        if (necesitaRepetir(r.nombre)) m = Math.max(m, base + 1);
       });
       return m;
     }
 
-    // ====== RENDER ======
+    // Estado texto y clases por "instancia" (base o repetido)
+    function textoEstadoInstancia(reg) {
+      const np = nfloat(reg.nota);
+      if (!Number.isFinite(np)) return "";
+
+      if (np >= NOTA_EXIMIDO) return "Eximido";
+
+      const fo = finalOrdinaria(reg);
+      if (!Number.isFinite(fo)) return "Examen Ord.";
+
+      if (fo < UMBRAL_EXTRA) return `Reprobado (<${UMBRAL_EXTRA})`;
+      if (fo >= NOTA_APRUEBA) return "Aprobado Ord.";
+
+      const fe = finalExtra(reg);
+      if (!Number.isFinite(fe)) return "Examen Ext.";
+      return fe >= NOTA_APRUEBA ? "Aprobado Ext." : "Reprobado Ext.";
+    }
+
+    function claseInstancia(reg) {
+      const np = nfloat(reg.nota);
+      if (!Number.isFinite(np)) return "";
+
+      if (np >= NOTA_EXIMIDO) return "eximido";
+
+      const nd = notaDefinitivaByReg(reg);
+      if (Number.isFinite(nd) && nd < NOTA_APRUEBA) return "reprobado";
+
+      return "examen"; // con cualquier presentación <5 va a exámenes
+    }
+
+    function renderInstancia({ ramo, semestreActual, esRepetido, habilitado, key }) {
+      const div = document.createElement("div");
+      div.classList.add("ramo");
+
+      const reg = getRegistro(key);
+      const clase = claseInstancia(reg);
+      if (clase) div.classList.add(clase);
+
+      if (!habilitado) div.classList.add("bloqueado");
+
+      const nd = notaDefinitivaByReg(reg);
+      const np = nfloat(reg.nota);
+      if (Number.isFinite(np) && !(Number.isFinite(nd) && nd < NOTA_APRUEBA)) {
+        div.classList.add("cursado");
+      }
+
+      const label = document.createElement("label");
+      label.textContent = ramo.nombre;
+      div.appendChild(label);
+
+      if (esRepetido) {
+        const b = document.createElement("span");
+        b.classList.add("badge");
+        b.textContent = "REPETIDO";
+        div.appendChild(b);
+      }
+
+      // Presentación
+      const inputP = document.createElement("input");
+      inputP.type = "number";
+      inputP.min = "1";
+      inputP.max = "7";
+      inputP.step = "0.1";
+      inputP.value = reg.nota;
+      inputP.disabled = !habilitado;
+
+      inputP.addEventListener("change", () => {
+        const nuevo = inputP.value;
+        const n = nfloat(nuevo);
+        if (Number.isFinite(n) && n >= NOTA_EXIMIDO) {
+          setRegistro(key, { nota: nuevo, ord: "", ext: "" });
+        } else {
+          setRegistro(key, { nota: nuevo });
+        }
+      });
+
+      div.appendChild(inputP);
+
+      // Exámenes si hay presentación y no es eximido
+      const tienePres = Number.isFinite(nfloat(reg.nota));
+      const esEximido = tienePres && nfloat(reg.nota) >= NOTA_EXIMIDO;
+
+      if (tienePres && !esEximido) {
+        const grupo = document.createElement("span");
+        grupo.classList.add("grupo-examen");
+
+        const miniO = document.createElement("span");
+        miniO.classList.add("mini");
+        miniO.textContent = "Ord:";
+
+        const inputOrd = document.createElement("input");
+        inputOrd.type = "number";
+        inputOrd.min = "1";
+        inputOrd.max = "7";
+        inputOrd.step = "0.1";
+        inputOrd.value = reg.ord;
+        inputOrd.disabled = !habilitado;
+
+        inputOrd.addEventListener("change", () => {
+          const nuevoOrd = inputOrd.value;
+          const temp = { ...getRegistro(key), ord: nuevoOrd };
+          const fo = finalOrdinaria(temp);
+          if (Number.isFinite(fo) && fo < UMBRAL_EXTRA) {
+            setRegistro(key, { ord: nuevoOrd, ext: "" });
+          } else {
+            setRegistro(key, { ord: nuevoOrd });
+          }
+        });
+
+        const miniE = document.createElement("span");
+        miniE.classList.add("mini");
+        miniE.textContent = "Ext:";
+
+        const inputExt = document.createElement("input");
+        inputExt.type = "number";
+        inputExt.min = "1";
+        inputExt.max = "7";
+        inputExt.step = "0.1";
+        inputExt.value = reg.ext;
+        inputExt.disabled = !habilitado;
+
+        inputExt.addEventListener("change", () => {
+          setRegistro(key, { ext: inputExt.value });
+        });
+
+        // Final (por instancia)
+        const miniF = document.createElement("span");
+        miniF.classList.add("mini");
+        miniF.textContent = "Final:";
+
+        const finalVal = document.createElement("span");
+        finalVal.classList.add("finalval");
+        const nd2 = notaDefinitivaByReg(reg);
+        finalVal.textContent = Number.isFinite(nd2) ? String(nd2).replace(".", ",") : "—";
+
+        // bloquear ext si no cumple >=3.5
+        if (!puedeRendirExtra(reg)) inputExt.disabled = true;
+
+        grupo.appendChild(miniO);
+        grupo.appendChild(inputOrd);
+        grupo.appendChild(miniE);
+        grupo.appendChild(inputExt);
+        grupo.appendChild(miniF);
+        grupo.appendChild(finalVal);
+
+        div.appendChild(grupo);
+      }
+
+      const estadoSpan = document.createElement("span");
+      estadoSpan.classList.add("estado");
+      estadoSpan.textContent = textoEstadoInstancia(reg);
+
+      // forzar rojo si definitiva reprobada
+      if (Number.isFinite(nd) && nd < NOTA_APRUEBA) {
+        div.classList.remove("eximido");
+        div.classList.remove("examen");
+        div.classList.add("reprobado");
+      }
+
+      div.appendChild(estadoSpan);
+      return div;
+    }
+
     function render() {
       contenedor.innerHTML = "";
 
       const shiftMap = calcularShiftDependientes();
-      const repiteMap = calcularRepites();
-      const maxSem = maxSemestreRender(shiftMap, repiteMap);
+      const maxSem = maxSemestreRender(shiftMap);
 
       const stickers = ["🐱","🎀","📖","🐰","🌷","🐝","🪄","🌻","🦦","🍀","✨","🌙","🧸","🍓","🧁"];
 
@@ -486,155 +595,34 @@
         titulo.textContent = `Semestre ${s}`;
         semestre.appendChild(titulo);
 
-        ramos
-          .filter(r => seMuestraEnSemestre(r, s, shiftMap, repiteMap))
-          .forEach(ramo => {
-            const div = document.createElement("div");
-            div.classList.add("ramo");
+        ramos.forEach(ramo => {
+          const semBaseMovido = semestreEfectivo(ramo, shiftMap);
 
-            const reg = getRegistro(ramo.nombre);
-            const clase = evaluarClase(reg);
-            if (clase) div.classList.add(clase);
-
-            // habilitado si cumple requisitos
-            // (si está bloqueado, no puedes ingresar notas)
+          // 1) instancia BASE se muestra cuando coincide con su semestre movido
+          if (semBaseMovido === s) {
             const habilitado = cumpleRequisitos(ramo);
-            if (!habilitado) div.classList.add("bloqueado");
+            semestre.appendChild(renderInstancia({
+              ramo,
+              semestreActual: s,
+              esRepetido: false,
+              habilitado,
+              key: keyBase(ramo.nombre)
+            }));
+          }
 
-            // cursado si tiene nota y no está reprobado definitivo
-            const np = nfloat(reg.nota);
-            if (Number.isFinite(np) && !ramoReprobadoDefinitivo(ramo.nombre)) {
-              div.classList.add("cursado");
-            }
-
-            // etiqueta ramo
-            const label = document.createElement("label");
-            label.textContent = ramo.nombre;
-
-            // badge "Repite" si es la copia del semestre siguiente
-            const baseSem = semestreEfectivo(ramo, shiftMap);
-            const esCopiaRepite = repiteMap[ramo.nombre] && (s === baseSem + 1);
-
-            div.appendChild(label);
-
-            if (esCopiaRepite) {
-              const b = document.createElement("span");
-              b.classList.add("badge");
-              b.textContent = "REPETIDO";
-              div.appendChild(b);
-            }
-
-            // Presentación
-            const inputP = document.createElement("input");
-            inputP.type = "number";
-            inputP.min = "1";
-            inputP.max = "7";
-            inputP.step = "0.1";
-            inputP.value = reg.nota;
-            inputP.disabled = !habilitado;
-
-            inputP.addEventListener("change", () => {
-              const nuevo = inputP.value;
-              const n = nfloat(nuevo);
-              // si pasa a eximido, limpiamos exámenes
-              if (Number.isFinite(n) && n >= NOTA_EXIMIDO) {
-                setRegistro(ramo.nombre, { nota: nuevo, ord: "", ext: "" });
-              } else {
-                setRegistro(ramo.nombre, { nota: nuevo });
-              }
-            });
-
-            div.appendChild(inputP);
-
-            // Si tiene presentación y NO es eximido => inputs de exámenes
-            const tienePresentacion = Number.isFinite(np);
-            const esEximido = tienePresentacion && np >= NOTA_EXIMIDO;
-
-            if (tienePresentacion && !esEximido) {
-              const grupo = document.createElement("span");
-              grupo.classList.add("grupo-examen");
-
-              const miniO = document.createElement("span");
-              miniO.classList.add("mini");
-              miniO.textContent = "Ord:";
-
-              const inputOrd = document.createElement("input");
-              inputOrd.type = "number";
-              inputOrd.min = "1";
-              inputOrd.max = "7";
-              inputOrd.step = "0.1";
-              inputOrd.value = reg.ord;
-              inputOrd.disabled = !habilitado;
-
-              inputOrd.addEventListener("change", () => {
-                // Si ordinaria queda <3.5, extraordinario no aplica: lo limpiamos
-                const nuevoOrd = inputOrd.value;
-                const temp = { ...getRegistro(ramo.nombre), ord: nuevoOrd };
-                const fo = finalOrdinaria(temp);
-                if (Number.isFinite(fo) && fo < UMBRAL_EXTRA) {
-                  setRegistro(ramo.nombre, { ord: nuevoOrd, ext: "" });
-                } else {
-                  setRegistro(ramo.nombre, { ord: nuevoOrd });
-                }
-              });
-
-              const miniE = document.createElement("span");
-              miniE.classList.add("mini");
-              miniE.textContent = "Ext:";
-
-              const inputExt = document.createElement("input");
-              inputExt.type = "number";
-              inputExt.min = "1";
-              inputExt.max = "7";
-              inputExt.step = "0.1";
-              inputExt.value = reg.ext;
-              inputExt.disabled = !habilitado;
-
-              inputExt.addEventListener("change", () => {
-                setRegistro(ramo.nombre, { ext: inputExt.value });
-              });
-
-              // Final (definitiva cuando exista; si no, muestra "—")
-              const miniF = document.createElement("span");
-              miniF.classList.add("mini");
-              miniF.textContent = "Final:";
-
-              const finalVal = document.createElement("span");
-              finalVal.classList.add("finalval");
-              const nd = notaDefinitivaByReg(reg);
-              finalVal.textContent = Number.isFinite(nd) ? String(nd).replace(".", ",") : "—";
-
-              // bloquear ext si no cumple requisito >=3.5
-              const puedeExt = puedeRendirExtra(reg);
-              if (!puedeExt) {
-                inputExt.disabled = true;
-              }
-
-              grupo.appendChild(miniO);
-              grupo.appendChild(inputOrd);
-              grupo.appendChild(miniE);
-              grupo.appendChild(inputExt);
-              grupo.appendChild(miniF);
-              grupo.appendChild(finalVal);
-
-              div.appendChild(grupo);
-            }
-
-            // Estado textual
-            const estadoSpan = document.createElement("span");
-            estadoSpan.classList.add("estado");
-            estadoSpan.textContent = textoEstado(reg);
-
-            // si definitivo reprobado => forzar clase reprobado
-            if (ramoReprobadoDefinitivo(ramo.nombre)) {
-              div.classList.remove("eximido");
-              div.classList.remove("examen");
-              div.classList.add("reprobado");
-            }
-
-            div.appendChild(estadoSpan);
-            semestre.appendChild(div);
-          });
+          // 2) instancia REPETIDO se muestra SOLO si el base reprobó definitivo y aún no aprueba repetido
+          if (necesitaRepetir(ramo.nombre) && (semBaseMovido + 1) === s) {
+            // El repetido se habilita igual que el ramo (requisitos), pero normalmente ya los tenía cumplidos cuando lo cursó
+            const habilitado = true; // para no bloquearte el recursado por reglas viejas
+            semestre.appendChild(renderInstancia({
+              ramo,
+              semestreActual: s,
+              esRepetido: true,
+              habilitado,
+              key: keyRep(ramo.nombre)
+            }));
+          }
+        });
 
         contenedor.appendChild(semestre);
       }
