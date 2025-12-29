@@ -17,15 +17,43 @@
       text-align: center;
       color: #5b2e7d;
       font-weight: 700;
-      margin-bottom: 30px;
+      margin-bottom: 14px;
       user-select: none;
     }
+    #barra {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    .btn {
+      border: 2px solid #c8a4e7;
+      background: #f9f2fc;
+      color: #5b2e7d;
+      padding: 8px 12px;
+      border-radius: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 4px 10px rgba(91, 46, 125, 0.12);
+    }
+    .btn:hover { background: #f3e9ff; }
+    .hint {
+      text-align: center;
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-bottom: 18px;
+    }
+
+    /* Contenedor horizontal por semestres */
     #contenedor {
       display: flex;
       gap: 20px;
       overflow-x: auto;
       padding-bottom: 20px;
     }
+    /* Cada semestre como columna */
     .semestre {
       background: #f9f2fc;
       border-radius: 16px;
@@ -51,6 +79,7 @@
       pointer-events: none;
       opacity: 0.5;
     }
+
     .ramo {
       background: #ffffffcc;
       border-radius: 12px;
@@ -100,6 +129,7 @@
       color: #aaa;
       border-color: #ddd;
     }
+
     .ramo:not(.bloqueado):hover {
       background-color: #f6e7ff;
       box-shadow: 0 6px 12px rgba(91, 46, 125, 0.3);
@@ -162,6 +192,14 @@
 </head>
 <body>
   <h1>📚 Malla Curricular Interactiva 🌸🐱</h1>
+
+  <div id="barra">
+    <button class="btn" id="btnCopiar">🔗 Copiar link portable</button>
+    <button class="btn" id="btnLimpiarLink">🧽 Limpiar link</button>
+    <button class="btn" id="btnBorrarTodo">🗑️ Borrar todo</button>
+  </div>
+  <div class="hint">Tip: si copias el link portable y lo abres en otro dispositivo, verás todas las notas (incluye exámenes).</div>
+
   <div id="contenedor"></div>
 
   <script>
@@ -244,26 +282,74 @@
     ];
 
     const contenedor = document.getElementById("contenedor");
-    let estados = JSON.parse(localStorage.getItem("estadoRamos") || '{}');
 
-    // NUEVO: ubicación mínima “pegada” (para que no se devuelva hacia atrás)
-    let ubicMin = JSON.parse(localStorage.getItem("ubicMinRamos") || '{}');
+    // ====== PORTABLE LINK (hash) ======
+    // guardamos { estados, ubicMin } dentro de #data=...
+    function encodeState(obj) {
+      const json = JSON.stringify(obj);
+      const b64 = btoa(unescape(encodeURIComponent(json)));
+      return encodeURIComponent(b64);
+    }
+    function decodeState(str) {
+      const b64 = decodeURIComponent(str);
+      const json = decodeURIComponent(escape(atob(b64)));
+      return JSON.parse(json);
+    }
+    function getHashData() {
+      const m = location.hash.match(/data=([^&]+)/);
+      if (!m) return null;
+      try { return decodeState(m[1]); } catch { return null; }
+    }
+    function setHashData(dataObj) {
+      const enc = encodeState(dataObj);
+      // dejamos solo data=... en el hash para no crecer con otros params
+      history.replaceState(null, "", location.pathname + location.search + "#data=" + enc);
+    }
+    function clearHashData() {
+      history.replaceState(null, "", location.pathname + location.search);
+    }
 
-    function guardar() {
+    // ====== STORAGE (local) + hydrate ======
+    let estados = {};
+    let ubicMin = {};
+
+    function cargarDesdeLocal() {
+      estados = JSON.parse(localStorage.getItem("estadoRamos") || "{}");
+      ubicMin = JSON.parse(localStorage.getItem("ubicMinRamos") || "{}");
+    }
+    function guardarEnLocal() {
       localStorage.setItem("estadoRamos", JSON.stringify(estados));
       localStorage.setItem("ubicMinRamos", JSON.stringify(ubicMin));
     }
 
+    function cargarInicial() {
+      // prioridad: link portable
+      const fromHash = getHashData();
+      if (fromHash && typeof fromHash === "object") {
+        estados = fromHash.estados || {};
+        ubicMin = fromHash.ubicMin || {};
+        guardarEnLocal(); // respaldo
+        return;
+      }
+      // si no hay link, carga normal
+      cargarDesdeLocal();
+    }
+
+    // Cada cambio actualiza: localStorage + URL portable
+    function guardarTodo() {
+      guardarEnLocal();
+      setHashData({ estados, ubicMin });
+    }
+
+    // ====== helpers notas ======
     function nfloat(x) {
       if (x === "" || x == null) return NaN;
       const n = parseFloat(x);
       return Number.isFinite(n) ? n : NaN;
     }
-
     function redondear1(n) {
       return Math.round((n + Number.EPSILON) * 10) / 10;
     }
-
     function keyBase(nombre) { return nombre; }
     function keyRep(nombre) { return nombre + REP_SUFFIX; }
 
@@ -273,14 +359,12 @@
       if (typeof v === "object") return { nota: v.nota ?? "", ord: v.ord ?? v.examen ?? "", ext: v.ext ?? "" };
       return { nota: String(v), ord: "", ext: "" };
     }
-
     function setRegistro(key, patch) {
       const reg = getRegistro(key);
       estados[key] = { ...reg, ...patch };
-      guardar();
+      guardarTodo();
       render();
     }
-
     function tieneDatos(key) {
       const r = getRegistro(key);
       return (r.nota !== "" || r.ord !== "" || r.ext !== "");
@@ -292,18 +376,15 @@
       if (!Number.isFinite(np) || !Number.isFinite(no)) return NaN;
       return redondear1(PESO_PRESENTACION * np + PESO_EXAMEN * no);
     }
-
     function finalExtra(reg) {
       const np = nfloat(reg.nota);
       const ne = nfloat(reg.ext);
       if (!Number.isFinite(np) || !Number.isFinite(ne)) return NaN;
       return redondear1(PESO_PRESENTACION * np + PESO_EXAMEN * ne);
     }
-
     function notaDefinitivaByReg(reg) {
       const np = nfloat(reg.nota);
       if (!Number.isFinite(np)) return NaN;
-
       if (np >= NOTA_EXIMIDO) return np;
 
       const fo = finalOrdinaria(reg);
@@ -316,10 +397,21 @@
       if (!Number.isFinite(fe)) return NaN;
       return fe;
     }
-
     function puedeRendirExtra(reg) {
       const fo = finalOrdinaria(reg);
       return Number.isFinite(fo) && fo >= UMBRAL_EXTRA;
+    }
+
+    function baseReprobadoDefinitivo(nombre) {
+      const ndB = notaDefinitivaByReg(getRegistro(keyBase(nombre)));
+      return Number.isFinite(ndB) && ndB < NOTA_APRUEBA;
+    }
+    function repAprobadoDefinitivo(nombre) {
+      const ndR = notaDefinitivaByReg(getRegistro(keyRep(nombre)));
+      return Number.isFinite(ndR) && ndR >= NOTA_APRUEBA;
+    }
+    function necesitaRepetir(nombre) {
+      return baseReprobadoDefinitivo(nombre) && !repAprobadoDefinitivo(nombre);
     }
 
     function notaDefinitivaRamo(nombre) {
@@ -335,22 +427,6 @@
       return NaN;
     }
 
-    function baseReprobadoDefinitivo(nombre) {
-      const ndB = notaDefinitivaByReg(getRegistro(keyBase(nombre)));
-      return Number.isFinite(ndB) && ndB < NOTA_APRUEBA;
-    }
-
-    function repAprobadoDefinitivo(nombre) {
-      const ndR = notaDefinitivaByReg(getRegistro(keyRep(nombre)));
-      return Number.isFinite(ndR) && ndR >= NOTA_APRUEBA;
-    }
-
-    // Repite si base reprobó definitivo y el repetido aún no aprueba.
-    // PERO: aunque ya apruebe, si tiene datos, lo seguimos mostrando como historial.
-    function necesitaRepetir(nombre) {
-      return baseReprobadoDefinitivo(nombre) && !repAprobadoDefinitivo(nombre);
-    }
-
     function cumpleRequisitos(ramo) {
       if (!ramo.requiere || ramo.requiere.length === 0) return true;
       return ramo.requiere.every(req => {
@@ -359,7 +435,7 @@
       });
     }
 
-    // mueve dependientes SOLO si el prerequisito tiene definitiva calculada y es <4
+    // mueve dependientes si el BASE reprobó definitivo
     function calcularShiftDependientes() {
       const dependientes = {};
       ramos.forEach(r => {
@@ -380,8 +456,7 @@
       }
 
       ramos.forEach(r => {
-        const nd = notaDefinitivaRamo(r.nombre);
-        if (Number.isFinite(nd) && nd < NOTA_APRUEBA) {
+        if (baseReprobadoDefinitivo(r.nombre)) {
           propagar(r.nombre, 1);
         }
       });
@@ -392,14 +467,12 @@
     function semestreEfectivoBase(ramo, shiftMap) {
       return (ramo.semestre || 1) + (shiftMap[ramo.nombre] || 0);
     }
-
-    // Semestre “pegado”: nunca baja, solo sube
     function semestreVisible(key, semCalculado) {
       const prev = ubicMin[key] || 0;
       const sem = Math.max(prev, semCalculado);
       if (sem > prev) {
         ubicMin[key] = sem;
-        guardar();
+        guardarTodo();
       }
       return sem;
     }
@@ -407,7 +480,6 @@
     function textoEstadoInstancia(reg) {
       const np = nfloat(reg.nota);
       if (!Number.isFinite(np)) return "";
-
       if (np >= NOTA_EXIMIDO) return "Eximido";
 
       const fo = finalOrdinaria(reg);
@@ -420,7 +492,6 @@
       if (!Number.isFinite(fe)) return "Examen Ext.";
       return fe >= NOTA_APRUEBA ? "Aprobado Ext." : "Reprobado Ext.";
     }
-
     function claseInstancia(reg) {
       const np = nfloat(reg.nota);
       if (!Number.isFinite(np)) return "";
@@ -428,7 +499,6 @@
 
       const nd = notaDefinitivaByReg(reg);
       if (Number.isFinite(nd) && nd < NOTA_APRUEBA) return "reprobado";
-
       return "examen";
     }
 
@@ -439,7 +509,6 @@
       const reg = getRegistro(key);
       const clase = claseInstancia(reg);
       if (clase) div.classList.add(clase);
-
       if (!habilitado) div.classList.add("bloqueado");
 
       const nd = notaDefinitivaByReg(reg);
@@ -562,23 +631,19 @@
 
     function render() {
       contenedor.innerHTML = "";
-
       const shiftMap = calcularShiftDependientes();
 
       const stickers = ["🐱","🎀","📖","🐰","🌷","🐝","🪄","🌻","🦦","🍀","✨","🌙","🧸","🍓","🧁"];
 
-      // calculamos máximo semestre considerando “pegado” + rep
       let maxSem = 10;
       ramos.forEach(ramo => {
         const semCalcBase = semestreEfectivoBase(ramo, shiftMap);
         const semBase = semestreVisible(keyBase(ramo.nombre), semCalcBase);
         maxSem = Math.max(maxSem, semBase);
 
-        // el repetido va en semBase+1 (y también “pegado” para que no se corra atrás)
-        const semCalcRep = semBase + 1;
         const mostrarRep = necesitaRepetir(ramo.nombre) || tieneDatos(keyRep(ramo.nombre));
         if (mostrarRep) {
-          const semRep = semestreVisible(keyRep(ramo.nombre), semCalcRep);
+          const semRep = semestreVisible(keyRep(ramo.nombre), semBase + 1);
           maxSem = Math.max(maxSem, semRep);
         }
       });
@@ -601,22 +666,18 @@
           const semBase = semestreVisible(keyBase(ramo.nombre), semCalcBase);
 
           if (semBase === s) {
-            const habilitado = cumpleRequisitos(ramo);
             semestre.appendChild(renderInstancia({
               ramo,
               esRepetido: false,
-              habilitado,
+              habilitado: cumpleRequisitos(ramo),
               key: keyBase(ramo.nombre)
             }));
           }
 
           const mostrarRep = necesitaRepetir(ramo.nombre) || tieneDatos(keyRep(ramo.nombre));
           if (mostrarRep) {
-            const semCalcRep = semBase + 1;
-            const semRep = semestreVisible(keyRep(ramo.nombre), semCalcRep);
-
+            const semRep = semestreVisible(keyRep(ramo.nombre), semBase + 1);
             if (semRep === s) {
-              // recursado: no lo bloqueamos por requisitos antiguos
               semestre.appendChild(renderInstancia({
                 ramo,
                 esRepetido: true,
@@ -631,6 +692,37 @@
       }
     }
 
+    // ====== BOTONES ======
+    document.getElementById("btnCopiar").addEventListener("click", async () => {
+      // asegura que el hash esté actualizado
+      setHashData({ estados, ubicMin });
+      const url = location.href;
+      try {
+        await navigator.clipboard.writeText(url);
+        alert("✅ Link portable copiado.\nÁbrelo en otro dispositivo y verás todas las notas.");
+      } catch {
+        prompt("Copia este link portable:", url);
+      }
+    });
+
+    document.getElementById("btnLimpiarLink").addEventListener("click", () => {
+      clearHashData();
+      alert("Listo: se limpió el link. Tus notas siguen guardadas localmente en este dispositivo.");
+    });
+
+    document.getElementById("btnBorrarTodo").addEventListener("click", () => {
+      if (!confirm("¿Seguro? Esto borra TODAS las notas y posiciones guardadas.")) return;
+      estados = {};
+      ubicMin = {};
+      localStorage.removeItem("estadoRamos");
+      localStorage.removeItem("ubicMinRamos");
+      clearHashData();
+      render();
+    });
+
+    // ====== INIT ======
+    cargarInicial();
+    // garantiza que si abres sin hash, genere uno al primer cambio (no ahora)
     render();
   </script>
 </body>
